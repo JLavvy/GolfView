@@ -1,0 +1,337 @@
+﻿@page "/"
+@using GolfViewApartments.Data
+@using GolfViewApartments.Models
+
+
+<PageTitle>GolfView Apartments - Your Perfect Getaway</PageTitle>
+
+<div>
+    <!-- Hero Section -->
+    <section class="relative h-[90vh] min-h-[600px] flex items-center">
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('/images/60.webp')">
+            <div class="absolute inset-0 bg-primary/50"></div>
+        </div>
+
+        <div class="relative w-full container mx-auto px-4 sm:px-2 md:px-14 lg:px-18 xl:px-[88px] max-w-[1440px]">
+            <div class="max-w-2xl space-y-6">
+                <div
+                    class="inline-flex items-center gap-2 bg-accent/20 backdrop-blur-sm rounded-full px-4 py-2 animate-fade-up">
+                    <svg class="h-4 w-4 text-accent fill-accent" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <span class="text-white text-sm font-medium">@ApartmentData.TotalUnits Apartments • Golf Course
+                        Living</span>
+                </div>
+
+                <h1
+                    class="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-white leading-tight animate-fade-up animation-delay-100">
+                    Your Perfect
+                    <span class="block text-accent">Getaway Awaits</span>
+                </h1>
+
+                <p class="text-lg text-white/90 leading-relaxed max-w-lg animate-fade-up animation-delay-200">
+                    Experience the perfect blend of luxury and tranquility at GolfView Apartments.
+                    Choose from studio, 1 & 2 bedroom apartments with bed only or B+B options.
+                </p>
+
+                <div class="flex flex-wrap gap-4 pt-2 animate-fade-up animation-delay-300">
+                    <a href="/booking"
+                        class="inline-flex items-center gap-2 px-6 py-3 bg-accent text-white font-semibold rounded-lg hover:bg-accent/90 transition-colors">
+                        Book Your Stay
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                    <a href="/apartments"
+                        class="inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-lg border-2 border-white/30 hover:bg-white/20 transition-colors">
+                        View Apartments
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Search Bar -->
+        <div class="absolute bottom-0 left-0 right-0 transform translate-y-1/2 z-10 px-4">
+            <div class="relative w-full container mx-auto px-4 sm:px-2 md:px-14 lg:px-18 xl:px-[88px] max-w-[1440px]">
+                <div class="bg-white rounded-2xl shadow-elegant p-6 max-w-4xl mx-auto">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div>
+                            <label class="block text-sm font-medium text-muted-foreground mb-2">Apartment Type</label>
+                            <div class="text-foreground font-medium">Studio, 1 & 2 Bed</div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-muted-foreground mb-2">Rental Type</label>
+                            <div class="text-foreground font-medium">Daily & Monthly</div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-muted-foreground mb-2">Meal Plans</label>
+                            <div class="text-foreground font-medium">Bed Only or B+B</div>
+                        </div>
+                        <a href="/apartments"
+                            class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent text-white font-semibold rounded-lg hover:bg-accent/90 transition-colors">
+                            View All
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-20">
+        <div class="w-full container mx-auto px-4 sm:px-2 md:px-14 lg:px-18 xl:px-[88px] max-w-[1440px]">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
+                    Our Story
+                </h2>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <img src="/images/hero-golf-resort.jpg" alt="GolfView Resort"
+                        class="rounded-xl shadow-lg w-full h-[450px] object-cover" />
+                </div>
+                <div class="space-y-6">
+
+                    <p class="text-gray-600 leading-relaxed">
+                        Founded in 2010, GolfView Apartments began with a simple vision: to create a
+                        sanctuary where guests could experience the perfect blend of luxury, nature,
+                        and world-class hospitality.
+                    </p>
+                    <p class="text-gray-600 leading-relaxed">
+                        Nestled alongside a championship golf course with stunning mountain views,
+                        our property has grown from a boutique collection of apartments to a
+                        premier destination for discerning travelers from around the world.
+                    </p>
+                    <p class="text-gray-600 leading-relaxed">
+                        Today, we continue to uphold the traditions of exceptional service while
+                        embracing modern comforts and sustainable practices. Every detail of your
+                        stay is carefully curated to ensure an unforgettable experience.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Apartments -->
+    <section class="py-20">
+        <div class="relative w-full container mx-auto px-4 sm:px-2 md:px-14 lg:px-18 xl:px-[88px] max-w-[1440px]">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <h2 class="text-3xl md:text-4xl font-heading font-bold text-foreground mb-4">
+                    Our Apartments
+                </h2>
+                <p class="text-muted-foreground">
+                    Choose from @ApartmentData.TotalUnits beautifully appointed apartments across three types.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                @foreach (var (apartment, index) in ApartmentData.Apartments.Select((a, i) => (a, i)))
+                {
+                    <a href="/apartments/@apartment.Id" class="group block animate-fade-up"
+                        style="animation-delay: @(index * 100)ms">
+                        <div
+                            class="bg-white rounded-xl overflow-hidden shadow-soft hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
+                            <div class="relative h-64 overflow-hidden">
+                                <img src="@apartment.Image" alt="@apartment.Name"
+                                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                <div
+                                    class="absolute top-4 left-4 bg-primary text-white px-3 py-1 rounded-full text-xs font-medium">
+                                    @apartment.Units Units
+                                </div>
+                                <div
+                                    class="absolute top-4 right-4 bg-accent text-white px-3 py-1 rounded-full text-sm font-semibold">
+                                    From KES @apartment.Pricing.DailyBedOnly.ToString("N0")/night
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-xs font-medium text-primary uppercase tracking-wide">
+                                        @apartment.Type.Replace("-", " ") • @apartment.Size
+                                    </span>
+                                </div>
+                                <h3 class="font-heading text-xl font-semibold text-foreground mb-2">
+                                    @apartment.Name
+                                </h3>
+                                <p class="text-muted-foreground text-sm mb-4 line-clamp-2">
+                                    @apartment.Description
+                                </p>
+                                <div
+                                    class="flex items-center justify-between text-sm text-muted-foreground border-t border-border pt-4">
+                                    <span class="flex items-center gap-1">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                        </svg>
+                                        Max @apartment.MaxGuests
+                                    </span>
+                                    <span class="flex items-center gap-1">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                        </svg>
+                                        @apartment.BedSize
+                                    </span>
+                                    <span>KES @apartment.Pricing.MonthlyBedOnly.ToString("N0")/mo</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+
+            <div class="text-center mt-12">
+                <a href="/apartments"
+                    class="inline-flex items-center gap-2 px-6 py-3 border-2 border-primary text-primary font-semibold rounded-lg hover:bg-primary hover:text-white transition-colors">
+                    View All Apartments
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Amenities Section -->
+    <section class="py-20">
+        <div class="w-full container mx-auto px-4 sm:px-2 md:px-14 lg:px-18 xl:px-[88px] max-w-[1440px]">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <h2 class="text-3xl md:text-4xl font-heading font-bold text-foreground">
+                        World-Class Amenities
+                    </h2>
+                    <p class="text-muted-foreground leading-relaxed">
+                        Indulge in our exceptional facilities designed for relaxation and recreation.
+                        From our stunning infinity pool overlooking the golf course to our fully-equipped
+                        fitness center and rejuvenating spa services.
+                    </p>
+
+                    <!-- Amenities List -->
+                    <ul class="space-y-3 list-disc pl-5 marker:text-accent text-foreground">
+                        @foreach (var amenity in amenities)
+                        {
+                            <li>
+                                @amenity
+                            </li>
+                        }
+                    </ul>
+
+                    <!-- Button -->
+                    <a href="/amenities"
+                        class="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                        Explore Amenities
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+
+                <!-- Image Column -->
+                <div class="relative">
+                    <img src="/images/pool-image.jpg" alt="Resort Pool"
+                        class="rounded-xl shadow-lg w-full h-[400px] object-cover" />
+
+                    <!-- Testimonial Card -->
+                    <div class="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-lg max-w-xs hidden lg:block">
+                        <div class="flex items-center gap-1 mb-2">
+                            @for (int i = 0; i < 5; i++)
+                            {
+                                <svg class="h-4 w-4 text-yellow-500 fill-yellow-500" fill="currentColor"
+                                    viewBox="0 0 20 20">
+                                    <path
+                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                            }
+                        </div>
+                        <p class="text-sm text-muted-foreground italic">
+                            "Absolutely stunning property with impeccable service. The views are breathtaking!"
+                        </p>
+                        <p class="text-sm font-medium text-foreground mt-2">— Sarah M.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-primary/50">
+        <div
+            class="relative w-full container mx-auto px-4 sm:px-2 md:px-14 lg:px-18 xl:px-[88px] max-w-[1440px] text-center">
+            <h2 class="text-3xl md:text-4xl font-heading font-bold text-white mb-4">
+                Ready to Experience Luxury?
+            </h2>
+            <p class="text-white/80 max-w-2xl mx-auto mb-8">
+                Book your stay today and discover why GolfView Apartments is the premier destination
+                for those seeking comfort, elegance, and unforgettable experiences.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="/booking"
+                    class="inline-flex items-center gap-2 px-6 py-3 bg-accent text-white font-semibold rounded-lg hover:bg-accent/90 transition-colors">
+                    Book Now
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+                <a href="/contact"
+                    class="inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-lg border-2 border-white/30 hover:bg-white/20 transition-colors">
+                    Contact Us
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+
+@code {
+    private List<string> amenities = AmenitiesData.Amenities;
+
+    private RenderFragment RenderIcon(string iconName) => builder =>
+    {
+        builder.OpenElement(0, "svg");
+        builder.AddAttribute(1, "class", "h-7 w-7 text-primary");
+        builder.AddAttribute(2, "fill", "none");
+        builder.AddAttribute(3, "stroke", "currentColor");
+        builder.AddAttribute(4, "viewBox", "0 0 24 24");
+
+        switch (iconName.ToLower())
+        {
+            case "home":
+                builder.OpenElement(5, "path");
+                builder.AddAttribute(6, "stroke-linecap", "round");
+                builder.AddAttribute(7, "stroke-linejoin", "round");
+                builder.AddAttribute(8, "stroke-width", "2");
+                builder.AddAttribute(9, "d", "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6");
+                builder.CloseElement();
+                break;
+            case "bed":
+                builder.OpenElement(5, "path");
+                builder.AddAttribute(6, "stroke-linecap", "round");
+                builder.AddAttribute(7, "stroke-linejoin", "round");
+                builder.AddAttribute(8, "stroke-width", "2");
+                builder.AddAttribute(9, "d", "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6");
+                builder.CloseElement();
+                break;
+            case "calendar":
+                builder.OpenElement(5, "path");
+                builder.AddAttribute(6, "stroke-linecap", "round");
+                builder.AddAttribute(7, "stroke-linejoin", "round");
+                builder.AddAttribute(8, "stroke-width", "2");
+                builder.AddAttribute(9, "d", "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z");
+                builder.CloseElement();
+                break;
+            case "coffee":
+                builder.OpenElement(5, "path");
+                builder.AddAttribute(6, "stroke-linecap", "round");
+                builder.AddAttribute(7, "stroke-linejoin", "round");
+                builder.AddAttribute(8, "stroke-width", "2");
+                builder.AddAttribute(9, "d", "M4 4v16h16V4H4zm12 4h4m-4 4h4");
+                builder.CloseElement();
+                break;
+        }
+
+        builder.CloseElement();
+    };
+}

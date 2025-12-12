@@ -1,0 +1,98 @@
+﻿@inherits LayoutComponentBase
+
+<div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50 h-20">
+    <nav class="w-full container mx-auto px-4 sm:px-2 md:px-14 lg:px-18 xl:px-[88px] max-w-[1440px]">
+        <div class="py-4 flex justify-between items-center ">
+            <a href="/" class="font-heading text-2xl font-bold text-primary">
+                GolfView <span class="text-accent">Apartments</span>
+            </a>
+
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="/" class="text-foreground hover:text-accent transition-colors">Home</a>
+                <a href="/apartments" class="text-foreground hover:text-accent transition-colors">Apartments</a>
+                <a href="/amenities" class="text-foreground hover:text-accent transition-colors">Amenities</a>
+                <a href="/contact" class="text-foreground hover:text-accent transition-colors">Contact</a>
+                <a href="/booking" class="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors font-medium">
+                    Book Now
+                </a>
+            </div>
+
+            <button @onclick="ToggleMobileMenu" class="md:hidden text-foreground">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+
+        @if (showMobileMenu)
+        {
+            <div class="md:hidden mt-4 pb-4 space-y-2">
+                <a href="/" class="block px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors">Home</a>
+                <a href="/apartments" class="block px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors">Apartments</a>
+                <a href="/amenities" class="block px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors">Amenities</a>
+                <a href="/contact" class="block px-4 py-2 text-foreground hover:bg-secondary rounded-lg transition-colors">Contact</a>
+                <a href="/booking" class="block px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors text-center font-medium">
+                    Book Now
+                </a>
+            </div>
+        }
+    </nav>
+</header>
+
+
+    <!-- Main Content -->
+    <main class="flex-1">
+        @Body
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-white py-12">
+        <div class="w-full container mx-auto px-4 sm:px-2 md:px-14 lg:px-18 xl:px-[88px] max-w-[1440px]">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="font-heading text-xl font-bold mb-4">GolfView Apartments</h3>
+                    <p class="text-white/70 text-sm">Experience luxury living with stunning golf course views.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-sm text-white/70">
+                        <li><a href="/apartments" class="hover:text-accent transition-colors">Apartments</a></li>
+                        <li><a href="/amenities" class="hover:text-accent transition-colors">Amenities</a></li>
+                        <li><a href="/booking" class="hover:text-accent transition-colors">Booking</a></li>
+                        <li><a href="/contact" class="hover:text-accent transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Contact</h4>
+                    <ul class="space-y-2 text-sm text-white/70">
+                        <li>+254 XXX XXX XXX</li>
+                        <li>info@golfviewapartments.com</li>
+                        <li>Nairobi, Kenya</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Follow Us</h4>
+                    <div class="flex gap-4">
+                        <a href="#" class="text-white/70 hover:text-accent transition-colors">Facebook</a>
+                        <a href="#" class="text-white/70 hover:text-accent transition-colors">Instagram</a>
+                        <a href="#" class="text-white/70 hover:text-accent transition-colors">Twitter</a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-white/10 mt-8 pt-8 text-center text-sm text-white/70">
+                <p>&copy; @DateTime.Now.Year GolfView Apartments. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</div>
+
+@code {
+    private bool showMobileMenu = false;
+
+    private void ToggleMobileMenu()
+    {
+        showMobileMenu = !showMobileMenu;
+    }
+}
