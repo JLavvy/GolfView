@@ -1,0 +1,73 @@
+# Build outputs
+bin/
+obj/
+out/
+Debug/
+Release/
+
+# Visual Studio / VS Code
+.vscode/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# Logs
+*.log
+
+# Auto-generated files
+Generated/
+Generated__*
+*.g.cs
+*.g.i.cs
+
+# Publish output
+/wwwroot/css/app.css
+/wwwroot/css/app.css.map
+
+# ASP.NET temporary files
+ASP.NET/
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+
+# Environment & secrets
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.json
+*.env
+
+# Rider / JetBrains
+.idea/
+*.DotSettings.user
+
+# System files
+Thumbs.db
+ehthumbs.db
+.DS_Store
+*.swp
+*.bak
+*.tmp
+
+# Node (if using Tailwind or npm)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+package-lock.json
+
+# Tailwind generated output
+wwwroot/css/*.css
+wwwroot/css/*.map
+
+# Publish profiles
+*.pubxml
+*.publishproj
