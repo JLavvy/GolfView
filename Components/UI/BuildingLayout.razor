@@ -1,0 +1,120 @@
+@using GolfViewApartments.Data
+@using GolfViewApartments.Models
+
+<div class="bg-card rounded-xl p-6 shadow-elegant">
+    <div class="flex items-center gap-3 mb-6">
+        <div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+            <svg class="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3" />
+            </svg>
+        </div>
+        <div>
+            <h3 class="font-heading text-xl font-semibold text-foreground">Building Layout</h3>
+            <p class="text-sm text-muted-foreground">@ApartmentData.TotalFloors Floors • @ApartmentData.TotalUnits Total Apartments</p>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="flex flex-wrap gap-4 mb-6 text-sm">
+        <div class="flex items-center gap-2">
+            <div class="h-4 w-4 rounded bg-primary/20 border border-primary"></div>
+            <span class="text-muted-foreground">Studio (24sqm)</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="h-4 w-4 rounded bg-accent/20 border border-accent"></div>
+            <span class="text-muted-foreground">1-Bedroom (30sqm)</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="h-4 w-4 rounded bg-gold/20 border border-gold"></div>
+            <span class="text-muted-foreground">2-Bedroom (40sqm)</span>
+        </div>
+    </div>
+
+    <!-- Building Visualization -->
+    <div class="space-y-2">
+        @foreach (var floor in buildingLayout.OrderByDescending(f => f.Floor))
+        {
+            <div class="flex items-center gap-3">
+                <!-- Floor Label -->
+                <div class="w-16 text-sm font-medium text-muted-foreground">
+                    Floor @floor.Floor
+                </div>
+
+                <!-- Units -->
+                <div class="flex-1 flex gap-1 flex-wrap">
+                    <!-- Studios -->
+                    @for (int i = 0; i < floor.Studios.Total; i++)
+                    {
+                        var isAvailable = i < floor.Studios.Available;
+                        var statusClass = isAvailable 
+                            ? "bg-primary/20 border border-primary text-primary" 
+                            : "bg-muted border border-border text-muted-foreground";
+                        var status = isAvailable ? "Available" : "Occupied";
+                        
+                        <div class="h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-colors @statusClass"
+                             title="Studio (@status)">
+                            S
+                        </div>
+                    }
+
+                    <!-- 1-Bedroom -->
+                    @for (int i = 0; i < floor.OneBedroom.Total; i++)
+                    {
+                        var isAvailable = i < floor.OneBedroom.Available;
+                        var statusClass = isAvailable 
+                            ? "bg-accent/20 border border-accent text-accent" 
+                            : "bg-muted border border-border text-muted-foreground";
+                        var status = isAvailable ? "Available" : "Occupied";
+                        
+                        <div class="h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-colors @statusClass"
+                             title="1-Bedroom (@status)">
+                            1B
+                        </div>
+                    }
+
+                    <!-- 2-Bedroom -->
+                    @for (int i = 0; i < floor.TwoBedroom.Total; i++)
+                    {
+                        var isAvailable = i < floor.TwoBedroom.Available;
+                        var statusClass = isAvailable 
+                            ? "bg-gold/20 border border-gold text-gold" 
+                            : "bg-muted border border-border text-muted-foreground";
+                        var status = isAvailable ? "Available" : "Occupied";
+                        
+                        <div class="h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-colors @statusClass"
+                             title="2-Bedroom (@status)">
+                            2B
+                        </div>
+                    }
+                </div>
+
+                <!-- Availability Summary -->
+                <div class="text-xs text-muted-foreground w-20 text-right">
+                    @(floor.Studios.Available + floor.OneBedroom.Available + floor.TwoBedroom.Available)/@(floor.Studios.Total + floor.OneBedroom.Total + floor.TwoBedroom.Total) free
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Floor Summary -->
+    <div class="mt-6 pt-6 border-t border-border">
+        <div class="grid grid-cols-3 gap-4 text-center">
+            @foreach (var apt in ApartmentData.Apartments)
+            {
+                <div class="space-y-1">
+                    <p class="text-2xl font-heading font-bold text-foreground">@apt.Units</p>
+                    <p class="text-xs text-muted-foreground">@apt.Name@(apt.Units > 1 ? "s" : "")</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<FloorInfo> buildingLayout = new();
+
+    protected override void OnInitialized()
+    {
+        buildingLayout = ApartmentData.GetBuildingLayout();
+    }
+}

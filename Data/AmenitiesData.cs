@@ -11,7 +11,7 @@ namespace GolfViewApartments.Data
             "Steam Bath & Sauna",
             "Golf Course Access",
             "Conference Facilities",
-            "Free Parking"
+            "Ample Parking"
         };
     }
 }

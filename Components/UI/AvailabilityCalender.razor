@@ -1,0 +1,273 @@
+@namespace GolfViewApartments.Components.UI
+
+@using GolfViewApartments.Data
+@using GolfViewApartments.Models
+@inject NavigationManager NavigationManager
+
+<div class="bg-card rounded-xl shadow-elegant overflow-hidden">
+    <!-- Header -->
+    <div class="bg-primary p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <svg class="h-6 w-6 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <h3 class="font-heading text-xl font-semibold text-primary-foreground">
+                Check Availability
+            </h3>
+        </div>
+
+        <!-- Apartment Selector -->
+        <select @bind="selectedApartmentId" class="w-full bg-primary-foreground/10 border border-primary-foreground/20 text-primary-foreground rounded-lg px-4 py-2">
+            @foreach (var apt in ApartmentData.Apartments)
+            {
+                <option value="@apt.Id">@apt.Name (@apt.Units units)</option>
+            }
+        </select>
+    </div>
+
+    <!-- Calendar Navigation -->
+    <div class="p-4 border-b border-border flex items-center justify-between">
+        <button @onclick="PreviousMonth" 
+                disabled="@IsSameMonth(currentMonth, DateTime.Now)"
+                class="p-2 hover:bg-secondary rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+        </button>
+        <h4 class="font-heading font-semibold text-foreground">
+            @currentMonth.ToString("MMMM yyyy")
+        </h4>
+        <button @onclick="NextMonth" class="p-2 hover:bg-secondary rounded-lg transition-colors">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="p-4">
+        <!-- Day Headers -->
+        <div class="grid grid-cols-7 gap-1 mb-2">
+            @foreach (var day in new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" })
+            {
+                <div class="text-center text-xs font-medium text-muted-foreground py-2">
+                    @day
+                </div>
+            }
+        </div>
+
+        <!-- Calendar Days -->
+        <div class="grid grid-cols-7 gap-1">
+            @for (int i = 0; i < startDayOfWeek; i++)
+            {
+                <div class="h-12"></div>
+            }
+
+            @foreach (var dayAvail in availability)
+            {
+                var day = dayAvail.Date;
+                var isPast = day.Date < DateTime.Now.Date;
+                var isSelectedCheckIn = checkInDate.HasValue && day.Date == checkInDate.Value.Date;
+                var isSelectedCheckOut = checkOutDate.HasValue && day.Date == checkOutDate.Value.Date;
+                var inRange = IsInRange(day);
+                var isTodayDate = day.Date == DateTime.Now.Date;
+
+                var buttonClass = $@"relative h-12 rounded-lg text-sm font-medium transition-all 
+                    flex flex-col items-center justify-center gap-0.5
+                    {(isPast ? "text-muted-foreground/50 cursor-not-allowed" : "")}
+                    {(isTodayDate ? "ring-2 ring-primary ring-offset-2" : "")}
+                    {(isSelectedCheckIn || isSelectedCheckOut ? "bg-primary text-primary-foreground" : "")}
+                    {(inRange ? "bg-primary/20" : "")}
+                    {(!isPast && !inRange && dayAvail.Status == "available" ? "hover:bg-secondary cursor-pointer" : "")}
+                    {(!isPast && !inRange && dayAvail.Status == "limited" ? "hover:bg-accent/20 cursor-pointer" : "")}
+                    {(dayAvail.Status == "full" ? "bg-muted cursor-not-allowed" : "")}";
+
+                <button @onclick="() => HandleDateClick(day, dayAvail)"
+                        disabled="@(isPast || dayAvail.Status == "full")"
+                        class="@buttonClass">
+                    <span>@day.Day</span>
+                    @if (!isPast)
+                    {
+                        var availClass = (isSelectedCheckIn || isSelectedCheckOut) ? "text-primary-foreground/80"
+                            : dayAvail.Status == "full" ? "text-destructive"
+                            : dayAvail.Status == "limited" ? "text-accent"
+                            : "text-primary";
+
+                        <span class="text-[10px] @availClass">
+                            @(dayAvail.Available > 0 ? dayAvail.Available.ToString() : "—")
+                        </span>
+                    }
+                </button>
+            }
+        </div>
+
+        <!-- Legend -->
+        <div class="mt-4 flex flex-wrap gap-4 text-xs">
+            <div class="flex items-center gap-2">
+                <div class="h-3 w-3 rounded bg-primary"></div>
+                <span class="text-muted-foreground">Available</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="h-3 w-3 rounded bg-accent"></div>
+                <span class="text-muted-foreground">Limited (≤2 left)</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="h-3 w-3 rounded bg-muted"></div>
+                <span class="text-muted-foreground">Fully Booked</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selection Summary -->
+    @if (checkInDate.HasValue)
+    {
+        <div class="p-4 bg-secondary border-t border-border">
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-sm">
+                    <span class="text-muted-foreground">Check-in: </span>
+                    <span class="font-medium text-foreground">
+                        @checkInDate.Value.ToString("ddd, MMM d, yyyy")
+                    </span>
+                </div>
+                @if (checkOutDate.HasValue)
+                {
+                    <div class="text-sm">
+                        <span class="text-muted-foreground">Check-out: </span>
+                        <span class="font-medium text-foreground">
+                            @checkOutDate.Value.ToString("ddd, MMM d, yyyy")
+                        </span>
+                    </div>
+                }
+            </div>
+
+            @if (checkOutDate.HasValue)
+            {
+                var nights = (checkOutDate.Value - checkInDate.Value).Days;
+                var totalPrice = nights * selectedApartment.Pricing.DailyBedOnly;
+
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-muted-foreground">@nights night(s) × KES @selectedApartment.Pricing.DailyBedOnly.ToString("N0")</span>
+                        <span class="font-semibold text-foreground">KES @totalPrice.ToString("N0")</span>
+                    </div>
+                    <button @onclick="BookNow"
+                            class="w-full bg-gold hover:bg-gold/90 text-gold-foreground font-semibold py-2 px-4 rounded-lg transition-colors">
+                        Book Now - @nights Night(s)
+                    </button>
+                </div>
+            }
+            else
+            {
+                <p class="text-sm text-muted-foreground">Select check-out date</p>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private DateTime currentMonth = DateTime.Now;
+    private string selectedApartmentId = "";
+    private Apartment selectedApartment = null!;
+    private List<DayAvailability> availability = new();
+    private DateTime? checkInDate = null;
+    private DateTime? checkOutDate = null;
+    private int startDayOfWeek = 0;
+
+    protected override void OnInitialized()
+    {
+        selectedApartmentId = ApartmentData.Apartments[0].Id;
+        selectedApartment = ApartmentData.Apartments[0];
+        UpdateAvailability();
+    }
+
+    protected override void OnParametersSet()
+    {
+        selectedApartment = ApartmentData.Apartments.First(a => a.Id == selectedApartmentId);
+    }
+
+    private void UpdateAvailability()
+    {
+        var monthStart = new DateTime(currentMonth.Year, currentMonth.Month, 1);
+        var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+        startDayOfWeek = (int)monthStart.DayOfWeek;
+
+        availability = new List<DayAvailability>();
+        var random = new Random();
+
+        for (var day = monthStart; day <= monthEnd; day = day.AddDays(1))
+        {
+            var randomOccupied = random.Next(0, (int)(selectedApartment.Units * 0.6));
+            var available = selectedApartment.Units - randomOccupied;
+            var status = available == 0 ? "full" : available <= 2 ? "limited" : "available";
+
+            availability.Add(new DayAvailability
+            {
+                Date = day,
+                Available = available,
+                Total = selectedApartment.Units,
+                Status = status
+            });
+        }
+    }
+
+    private void PreviousMonth()
+    {
+        if (!IsSameMonth(currentMonth, DateTime.Now))
+        {
+            currentMonth = currentMonth.AddMonths(-1);
+            UpdateAvailability();
+        }
+    }
+
+    private void NextMonth()
+    {
+        currentMonth = currentMonth.AddMonths(1);
+        UpdateAvailability();
+    }
+
+    private bool IsSameMonth(DateTime d1, DateTime d2)
+        => d1.Year == d2.Year && d1.Month == d2.Month;
+
+    private void HandleDateClick(DateTime day, DayAvailability dayAvail)
+    {
+        if (day.Date < DateTime.Now.Date || dayAvail.Status == "full") return;
+
+        if (!checkInDate.HasValue || (checkInDate.HasValue && checkOutDate.HasValue))
+        {
+            checkInDate = day;
+            checkOutDate = null;
+        }
+        else if (day.Date < checkInDate.Value.Date)
+        {
+            checkInDate = day;
+            checkOutDate = null;
+        }
+        else
+        {
+            checkOutDate = day;
+        }
+    }
+
+    private bool IsInRange(DateTime day)
+        => checkInDate.HasValue && checkOutDate.HasValue && day.Date > checkInDate.Value.Date && day.Date < checkOutDate.Value.Date;
+
+    private void BookNow()
+    {
+        if (checkInDate.HasValue && checkOutDate.HasValue)
+        {
+            var url = $"/booking?apartment={selectedApartment.Id}&checkIn={checkInDate.Value:yyyy-MM-dd}&checkOut={checkOutDate.Value:yyyy-MM-dd}";
+            NavigationManager.NavigateTo(url);
+        }
+    }
+
+    private class DayAvailability
+    {
+        public DateTime Date { get; set; }
+        public int Available { get; set; }
+        public int Total { get; set; }
+        public string Status { get; set; } = "";
+    }
+}
