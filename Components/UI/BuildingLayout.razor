@@ -9,13 +9,13 @@
             </svg>
         </div>
         <div>
-            <h3 class="font-heading text-xl font-semibold text-foreground">Building Layout</h3>
-            <p class="text-sm text-muted-foreground">@ApartmentData.TotalFloors Floors • @ApartmentData.TotalUnits Total Apartments</p>
+            <h3 class="font-heading text-xl font-semibold text-black">Building Layout</h3>
+            <p class="text-sm font-body text-muted-foreground">@ApartmentData.TotalFloors Floors • @ApartmentData.TotalUnits Total Apartments</p>
         </div>
     </div>
 
     <!-- Legend -->
-    <div class="flex flex-wrap gap-4 mb-6 text-sm">
+    <div class="flex flex-wrap gap-4 mb-6 text-sm font-body">
         <div class="flex items-center gap-2">
             <div class="h-4 w-4 rounded bg-primary/20 border border-primary"></div>
             <span class="text-muted-foreground">Studio (24sqm)</span>
@@ -34,57 +34,83 @@
     <div class="space-y-2">
         @foreach (var floor in buildingLayout.OrderByDescending(f => f.Floor))
         {
+            var floorPrefix = floor.Floor == 0 ? "G" : floor.Floor.ToString();
+            var unitCounter = 1;
+            
             <div class="flex items-center gap-3">
                 <!-- Floor Label -->
                 <div class="w-16 text-sm font-medium text-muted-foreground">
-                    Floor @floor.Floor
+                    @(floor.Floor == 0 ? "Ground" : $"Floor {floor.Floor}")
                 </div>
 
-                <!-- Units -->
-                <div class="flex-1 flex gap-1 flex-wrap">
-                    <!-- Studios -->
-                    @for (int i = 0; i < floor.Studios.Total; i++)
-                    {
-                        var isAvailable = i < floor.Studios.Available;
-                        var statusClass = isAvailable 
-                            ? "bg-primary/20 border border-primary text-primary" 
-                            : "bg-muted border border-border text-muted-foreground";
-                        var status = isAvailable ? "Available" : "Occupied";
+                <!-- Units Visualization -->
+                <div class="flex-1 flex gap-1 flex-wrap font-body">
+                    @{
+                        var totalUnits = floor.Studios.Total + floor.OneBedroom.Total + floor.TwoBedroom.Total;
+                        var studioIndex = 0;
+                        var oneBedroomIndex = 0;
+                        var twoBedroomIndex = 0;
                         
-                        <div class="h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-colors @statusClass"
-                             title="Studio (@status)">
-                            S
-                        </div>
-                    }
-
-                    <!-- 1-Bedroom -->
-                    @for (int i = 0; i < floor.OneBedroom.Total; i++)
-                    {
-                        var isAvailable = i < floor.OneBedroom.Available;
-                        var statusClass = isAvailable 
-                            ? "bg-accent/20 border border-accent text-accent" 
-                            : "bg-muted border border-border text-muted-foreground";
-                        var status = isAvailable ? "Available" : "Occupied";
-                        
-                        <div class="h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-colors @statusClass"
-                             title="1-Bedroom (@status)">
-                            1B
-                        </div>
-                    }
-
-                    <!-- 2-Bedroom -->
-                    @for (int i = 0; i < floor.TwoBedroom.Total; i++)
-                    {
-                        var isAvailable = i < floor.TwoBedroom.Available;
-                        var statusClass = isAvailable 
-                            ? "bg-gold/20 border border-gold text-gold" 
-                            : "bg-muted border border-border text-muted-foreground";
-                        var status = isAvailable ? "Available" : "Occupied";
-                        
-                        <div class="h-8 w-8 rounded flex items-center justify-center text-xs font-medium transition-colors @statusClass"
-                             title="2-Bedroom (@status)">
-                            2B
-                        </div>
+                        for (int i = 0; i < totalUnits; i++)
+                        {
+                            var unitType = i % 3; // 0 = Studio, 1 = 1-Bedroom, 2 = 2-Bedroom
+                            var roomNumber = $"{floorPrefix}{unitCounter:D2}";
+                            unitCounter++;
+                            
+                            if (unitType == 0 && studioIndex < floor.Studios.Total)
+                            {
+                                // Studio
+                                var isAvailable = studioIndex < floor.Studios.Available;
+                                var statusClass = isAvailable 
+                                    ? "bg-primary/20 border border-primary text-primary" 
+                                    : "bg-muted border border-border text-muted-foreground";
+                                var status = isAvailable ? "Available" : "Occupied";
+                                studioIndex++;
+                                
+                                <div class="h-10 w-12 rounded flex flex-col items-center justify-center text-xs font-medium transition-colors @statusClass"
+                                     title="Studio - Room @roomNumber (@status)">
+                                    <span class="font-semibold text-[11px]">@roomNumber</span>
+                                    <span class="text-[9px] opacity-75">S</span>
+                                </div>
+                            }
+                            else if (unitType == 1 && oneBedroomIndex < floor.OneBedroom.Total)
+                            {
+                                // 1-Bedroom
+                                var isAvailable = oneBedroomIndex < floor.OneBedroom.Available;
+                                var statusClass = isAvailable 
+                                    ? "bg-accent/20 border border-accent text-accent" 
+                                    : "bg-muted border border-border text-muted-foreground";
+                                var status = isAvailable ? "Available" : "Occupied";
+                                oneBedroomIndex++;
+                                
+                                <div class="h-10 w-12 rounded flex flex-col items-center justify-center text-xs font-medium transition-colors @statusClass"
+                                     title="1-Bedroom - Room @roomNumber (@status)">
+                                    <span class="font-semibold text-[11px]">@roomNumber</span>
+                                    <span class="text-[9px] opacity-75">1B</span>
+                                </div>
+                            }
+                            else if (unitType == 2 && twoBedroomIndex < floor.TwoBedroom.Total)
+                            {
+                                // 2-Bedroom
+                                var isAvailable = twoBedroomIndex < floor.TwoBedroom.Available;
+                                var statusClass = isAvailable 
+                                    ? "bg-gold/20 border border-gold text-gold" 
+                                    : "bg-muted border border-border text-muted-foreground";
+                                var status = isAvailable ? "Available" : "Occupied";
+                                twoBedroomIndex++;
+                                
+                                <div class="h-10 w-12 rounded flex flex-col items-center justify-center text-xs font-medium transition-colors @statusClass"
+                                     title="2-Bedroom - Room @roomNumber (@status)">
+                                    <span class="font-semibold text-[11px]">@roomNumber</span>
+                                    <span class="text-[9px] opacity-75">2B</span>
+                                </div>
+                            }
+                            else
+                            {
+                                // If we run out of one type, skip to the next in sequence
+                                i--;
+                            }
+                        }
                     }
                 </div>
 
@@ -102,8 +128,8 @@
             @foreach (var apt in ApartmentData.Apartments)
             {
                 <div class="space-y-1">
-                    <p class="text-2xl font-heading font-bold text-foreground">@apt.Units</p>
-                    <p class="text-xs text-muted-foreground">@apt.Name@(apt.Units > 1 ? "s" : "")</p>
+                    <p class="text-2xl font-heading font-bold text-black">@apt.Units</p>
+                    <p class="text-xs font-body text-muted-foreground">@apt.Name@(apt.Units > 1 ? "s" : "")</p>
                 </div>
             }
         </div>

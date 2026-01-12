@@ -1,0 +1,570 @@
+@page "/booking"
+@using System.ComponentModel.DataAnnotations
+@using GolfViewApartments.Data
+@using GolfViewApartments.Models
+@inject NavigationManager Navigation
+
+<div>
+    <!-- Hero Section -->
+    <section class="bg-primary py-20">
+        <div class="relative w-full container mx-auto px-4 sm:px-2 md:px-14 lg:px-18 xl:px-[88px] max-w-[1440px]">
+            <div class="max-w-2xl">
+                <h1 class="text-4xl md:text-5xl font-heading font-bold text-white mb-4">
+                    Book Your Stay
+                </h1>
+                <p class="text-white text-lg font-body">
+                    Complete the form below to request a reservation. Choose from daily or monthly
+                    rental options with bed only or B+B meal plans.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Form -->
+    <section class="py-20">
+        <div class="relative w-full container mx-auto px-4 sm:px-2 md:px-14 lg:px-18 xl:px-[88px] max-w-[1440px]">
+            <div class="grid lg:grid-cols-3 gap-12">
+                <!-- Form -->
+                <div class="lg:col-span-2">
+                    <div class="bg-card rounded-xl p-8 shadow-elegant">
+                        <h2 class="text-2xl font-heading font-bold text-black mb-6">
+                            Reservation Details
+                        </h2>
+
+                        <EditForm Model="@bookingModel" OnValidSubmit="@HandleSubmit">
+                            <DataAnnotationsValidator />
+                            <div class="space-y-6 font-body">
+                                <!-- Personal Info -->
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="firstName" class="block text-sm font-medium text-black mb-2">
+                                            First Name <span class="text-destructive text-red-600">*</span>
+                                        </label>
+                                        <InputText id="firstName" @bind-Value="bookingModel.FirstName"
+                                            class="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                            placeholder="John" required />
+                                        <ValidationMessage For="@(() => bookingModel.FirstName)"
+                                            class="text-destructive text-sm mt-1" />
+                                    </div>
+                                    <div>
+                                        <label for="lastName" class="block text-sm font-medium text-black mb-2">
+                                            Last Name <span class="text-destructive text-red-600">*</span>
+                                        </label>
+                                        <InputText id="lastName" @bind-Value="bookingModel.LastName"
+                                            class="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                            placeholder="Doe" required />
+                                        <ValidationMessage For="@(() => bookingModel.LastName)"
+                                            class="text-destructive text-sm mt-1" />
+                                    </div>
+                                </div>
+
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="email" class="block text-sm font-medium text-black mb-2">
+                                            Email <span class="text-destructive text-red-600">*</span>
+                                        </label>
+                                        <InputText id="email" type="email" @bind-Value="bookingModel.Email"
+                                            class="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                            placeholder="john@example.com" required />
+                                        <ValidationMessage For="@(() => bookingModel.Email)"
+                                            class="text-destructive text-sm mt-1" />
+                                    </div>
+                                    <div>
+                                        <label for="phone" class="block text-sm font-medium text-black mb-2">
+                                            Phone <span class="text-destructive text-red-600">*</span>
+                                        </label>
+                                        <InputText id="phone" type="tel" @bind-Value="bookingModel.Phone"
+                                            class="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                            placeholder="+254 700 000 000" required />
+                                        <ValidationMessage For="@(() => bookingModel.Phone)"
+                                            class="text-destructive text-sm mt-1" />
+                                    </div>
+                                </div>
+
+                                <!-- Apartment Selection -->
+                                <div>
+                                    <label for="apartment" class="block text-sm font-medium text-black mb-2">
+                                        Select Apartment <span class="text-destructive text-red-600">*</span>
+                                    </label>
+                                    <InputSelect id="apartment" @bind-Value="bookingModel.ApartmentId"
+                                        class="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                        required>
+                                        <option value="">Choose an apartment</option>
+                                        @foreach (var apt in apartments)
+                                        {
+                                            <option value="@apt.Id">
+                                                @apt.Name (@apt.Size, Max @apt.MaxGuests) - From KES
+                                                @apt.Pricing.DailyBedOnly.ToString("N0")/night
+                                            </option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => bookingModel.ApartmentId)"
+                                        class="text-destructive text-sm mt-1" />
+                                </div>
+
+                                <!-- Rental Type & Meal Plan -->
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="rentalType" class="block text-sm font-medium text-black mb-2">
+                                            Rental Type <span class="text-destructive text-red-600">*</span>
+                                        </label>
+                                        <InputSelect id="rentalType" @bind-Value="bookingModel.RentalType"
+                                            class="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                            required>
+                                            @foreach (var rentalType in rentalTypes)
+                                            {
+                                                <option value="@rentalType.Key">@rentalType.Value.Label</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+                                    <div>
+                                        <label for="mealPlan" class="block text-sm font-medium text-black mb-2">
+                                            Meal Plan <span class="text-destructive text-red-600">*</span>
+                                        </label>
+                                        <InputSelect id="mealPlan" @bind-Value="bookingModel.MealPlan"
+                                            class="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                            required>
+                                            @foreach (var mealPlan in mealPlans)
+                                            {
+                                                <option value="@mealPlan.Key">@mealPlan.Value.Label
+                                                    (@mealPlan.Value.ShortLabel)</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+                                </div>
+
+                                <!-- Dates -->
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="checkIn" class="block text-sm font-medium text-black mb-2">
+                                            Check-in Date <span class="text-destructive text-red-600">*</span>
+                                        </label>
+                                        <InputDate id="checkIn" @bind-Value="bookingModel.CheckIn"
+                                            class="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                            required />
+                                        <ValidationMessage For="@(() => bookingModel.CheckIn)"
+                                            class="text-destructive text-sm mt-1" />
+                                    </div>
+                                    <div>
+                                        <label for="checkOut" class="block text-sm font-medium text-black mb-2">
+                                            Check-out Date <span class="text-destructive text-red-600">*</span>
+                                        </label>
+                                        <InputDate id="checkOut" @bind-Value="bookingModel.CheckOut"
+                                            class="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                            required />
+                                        <ValidationMessage For="@(() => bookingModel.CheckOut)"
+                                            class="text-destructive text-sm mt-1" />
+                                    </div>
+                                </div>
+
+                                <!-- Guests -->
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="adults" class="block text-sm font-medium text-black mb-2">
+                                            Number of Adults <span class="text-destructive text-red-600">*</span>
+                                        </label>
+                                        <InputSelect id="adults" @bind-Value="bookingModel.Adults"
+                                            class="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                            required>
+                                            <option value="">Select number of adults</option>
+                                            @for (int i = 1; i <= 4; i++)
+                                            {
+                                                <option value="@i">@i @(i == 1 ? "Adult" : "Adults")</option>
+                                            }
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => bookingModel.Adults)"
+                                            class="text-destructive text-sm mt-1" />
+                                    </div>
+                                    <div>
+                                        <label for="children" class="block text-sm font-medium text-black mb-2">
+                                            Number of Children
+                                        </label>
+                                        <InputSelect id="children" @bind-Value="bookingModel.Children"
+                                            class="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
+                                            <option value="0">No children</option>
+                                            @for (int i = 1; i <= 3; i++)
+                                            {
+                                                <option value="@i">@i @(i == 1 ? "Child" : "Children")</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+                                </div>
+
+                                @if (bookingModel.Children > 0)
+                                {
+                                    <div class="rounded-lg p-4">
+                                        <div class="flex items-start gap-2 mb-3">
+                                            <i class="fas fa-child text-primary mt-1"></i>
+                                            <div>
+                                                <p class="text-sm font-medium text-black mb-1">
+                                                    Children's Ages
+                                                </p>
+                                                <p class="text-xs text-muted-foreground">
+                                                    Please specify the age for each child
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="grid md:grid-cols-3 gap-3">
+                                            @for (int i = 0; i < bookingModel.Children; i++)
+                                            {
+                                                int index = i;
+                                                string childId = $"childAge{index}";
+                                                <div>
+                                                    <label for="@childId"
+                                                        class="block text-xs font-medium text-muted-foreground mb-1">
+                                                        Child @(index + 1) Age <span class="text-destructive text-red-600">*</span>
+                                                    </label>
+                                                    <InputNumber id="@childId"
+                                                        @bind-Value="bookingModel.ChildrenAges[index]"
+                                                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                                        min="0" max="17" placeholder="Age" required />
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="mt-3 flex items-start gap-2  rounded p-2">
+                                            <i class="fas fa-info-circle text-primary text-xs mt-0.5"></i>
+                                            <p class="text-xs text-muted-foreground">
+                                                Children under 2 years stay free. Children 2-12 may have special rates.
+                                            </p>
+                                        </div>
+                                    </div>
+                                }
+
+                                <!-- Special Requests -->
+                                <div>
+                                    <label for="specialRequests" class="block text-sm font-medium text-black mb-2">
+                                        Special Requests
+                                    </label>
+                                    <InputTextArea id="specialRequests" @bind-Value="bookingModel.SpecialRequests"
+                                        rows="4"
+                                        class="w-full px-4 py-2.5 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
+                                        placeholder="Any special requirements or preferences..." />
+                                    <p class="text-xs text-muted-foreground mt-1">
+                                        Optional: Let us know about dietary restrictions, accessibility needs, or other
+                                        preferences.
+                                    </p>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <button type="submit"
+                                    class="w-full bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    disabled="@isSubmitting">
+                                    @if (isSubmitting)
+                                    {
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        <span>Submitting...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span>Request Reservation</span>
+                                    }
+                                </button>
+
+                                <p class="text-xs text-center font-body text-muted-foreground">
+                                    By submitting this form, you agree to our terms and conditions. We'll contact you
+                                    within 24 hours to confirm your reservation.
+                                </p>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+
+                <!-- Summary Sidebar -->
+                <div>
+                    <div class="bg-card rounded-xl p-6 sticky top-24 shadow-elegant">
+                        <h3 class="text-lg font-heading font-semibold text-black mb-4">
+                            Booking Summary
+                        </h3>
+
+                        <div class="space-y-4 text-sm font-body">
+                            @if (selectedApartment != null)
+                            {
+                                <div class="flex justify-between">
+                                    <span class="text-black">Apartment</span>
+                                    <span class="font-medium text-muted-foreground">@selectedApartment.Name</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-black">Size</span>
+                                    <span class="font-medium text-muted-foreground">@selectedApartment.Size</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-black">Bed Size</span>
+                                    <span class="font-medium text-muted-foreground">@selectedApartment.BedSize</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted-foreground">Select an apartment to see pricing</p>
+                            }
+
+                            <div class="flex justify-between">
+                                <span class="text-black">Rental Type</span>
+                                <span
+                                    class="font-medium text-muted-foreground">@(rentalTypes.ContainsKey(bookingModel.RentalType)
+                                                                        ? rentalTypes[bookingModel.RentalType].Label : "")</span>
+                            </div>
+
+                            <div class="flex justify-between">
+                                <span class="text-black">Meal Plan</span>
+                                <span class="font-medium text-muted-foreground">@(mealPlans.ContainsKey(bookingModel.MealPlan)
+                                                                        ? mealPlans[bookingModel.MealPlan].Label : "")</span>
+                            </div>
+
+                            @if (bookingModel.CheckIn != null)
+                            {
+                                <div class="flex justify-between">
+                                    <span class="text-black">Check-in</span>
+                                    <span
+                                        class="font-medium text-muted-foreground">@bookingModel.CheckIn.Value.ToString("yyyy-MM-dd")</span>
+                                </div>
+                            }
+
+                            @if (bookingModel.CheckOut != null)
+                            {
+                                <div class="flex justify-between">
+                                    <span class="text-black">Check-out</span>
+                                    <span
+                                        class="font-medium text-muted-foreground">@bookingModel.CheckOut.Value.ToString("yyyy-MM-dd")</span>
+                                </div>
+                            }
+
+                            @if (bookingModel.Adults > 0)
+                            {
+                                <div class="flex justify-between">
+                                    <span class="text-black">Adults</span>
+                                    <span class="font-medium text-muted-foreground">@bookingModel.Adults</span>
+                                </div>
+                            }
+
+                            @if (bookingModel.Children > 0)
+                            {
+                                <div class="flex justify-between">
+                                    <span class="text-black">Children</span>
+                                    <span class="font-medium text-muted-foreground">@bookingModel.Children (Ages: @string.Join(", ", bookingModel.ChildrenAges.Take(bookingModel.Children)))</span>
+                                </div>
+                            }
+
+                            @if (priceSummary != null)
+                            {
+                                <div class="border-t border-border pt-4 mt-4">
+                                    <div class="flex justify-between mb-2 font-body">
+                                        <span class="text-black">
+                                            @priceSummary.Nights night(s) x KES
+                                            @Math.Round(priceSummary.DailyRate).ToString("N0")
+                                        </span>
+                                        <span class="font-medium text-muted-foreground">
+                                            KES @Math.Round(priceSummary.Subtotal).ToString("N0")
+                                        </span>
+                                    </div>
+                                    <div class="flex justify-between font-semibold text-lg">
+                                        <span class="text-black">Total</span>
+                                        <span class="text-primary">KES
+                                            @Math.Round(priceSummary.Subtotal).ToString("N0")</span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Price Reference -->
+                        @if (selectedApartment != null)
+                        {
+                            <div class="mt-6 pt-6 border-t border-border">
+                                <h4 class="font-medium font-heading text-black mb-3">Rate Card (KES):</h4>
+                                <div class="space-y-2 text-sm font-body">
+                                    <div class="flex justify-between">
+                                        <span class="text-black">Daily B/O</span>
+                                        <span
+                                            class="text-muted-foreground">@selectedApartment.Pricing.DailyBedOnly.ToString("N0")</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-black">Daily B+B</span>
+                                        <span
+                                            class="text-muted-foreground">@selectedApartment.Pricing.DailyBB.ToString("N0")</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-black">Monthly B/O</span>
+                                        <span
+                                            class="text-muted-foreground">@selectedApartment.Pricing.MonthlyBedOnly.ToString("N0")</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-black">Monthly B+B</span>
+                                        <span
+                                            class="text-muted-foreground">@selectedApartment.Pricing.MonthlyBB.ToString("N0")</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@code {
+    private BookingModel bookingModel = new();
+    private bool isSubmitting = false;
+    private List<Apartment> apartments = new();
+    private Dictionary<string, MealPlanInfo> mealPlans = new();
+    private Dictionary<string, RentalTypeInfo> rentalTypes = new();
+    private Apartment? selectedApartment => apartments.FirstOrDefault(a => a.Id == bookingModel.ApartmentId);
+    private PriceSummary? priceSummary => CalculatePriceSummary();
+
+    protected override void OnInitialized()
+    {
+        // Load data from ApartmentData
+        apartments = ApartmentData.Apartments;
+        mealPlans = ApartmentData.MealPlans;
+        rentalTypes = ApartmentData.RentalTypes;
+
+        // Pre-fill from query parameters
+        var uri = new Uri(Navigation.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+        if (!string.IsNullOrEmpty(query["apartment"]))
+            bookingModel.ApartmentId = query["apartment"] ?? "";
+
+        if (DateTime.TryParse(query["checkIn"], out var checkIn))
+            bookingModel.CheckIn = checkIn;
+
+        if (DateTime.TryParse(query["checkOut"], out var checkOut))
+            bookingModel.CheckOut = checkOut;
+    }
+
+    private PriceSummary? CalculatePriceSummary()
+    {
+        if (selectedApartment == null || bookingModel.CheckIn == null || bookingModel.CheckOut == null)
+            return null;
+
+        var nights = (bookingModel.CheckOut.Value - bookingModel.CheckIn.Value).Days;
+        if (nights <= 0) return null;
+
+        decimal dailyRate;
+        if (bookingModel.RentalType == "daily")
+        {
+            dailyRate = bookingModel.MealPlan == "bed-only"
+                            ? selectedApartment.Pricing.DailyBedOnly
+            : selectedApartment.Pricing.DailyBB;
+        }
+        else
+        {
+            dailyRate = bookingModel.MealPlan == "bed-only"
+                            ? selectedApartment.Pricing.MonthlyBedOnly / 30
+                            : selectedApartment.Pricing.MonthlyBB / 30;
+        }
+
+        return new PriceSummary
+        {
+            Nights = nights,
+            DailyRate = dailyRate,
+            Subtotal = dailyRate * nights
+        };
+    }
+
+    private async Task HandleSubmit()
+    {
+        // Additional validation
+        if (bookingModel.CheckIn < DateTime.Today)
+        {
+            // Show error message - you can replace this with your preferred notification method
+            return;
+        }
+
+        if (bookingModel.CheckOut <= bookingModel.CheckIn)
+        {
+            // Show error message
+            return;
+        }
+
+        // Validate children ages if children are present
+        if (bookingModel.Children > 0)
+        {
+            for (int i = 0; i < bookingModel.Children; i++)
+            {
+                if (bookingModel.ChildrenAges[i] < 0 || bookingModel.ChildrenAges[i] > 17)
+                {
+                    // Show error message
+                    return;
+                }
+            }
+        }
+
+        // Validate total guests against apartment capacity
+        if (selectedApartment != null && bookingModel.TotalGuests > selectedApartment.MaxGuests)
+        {
+            // Show error message
+            return;
+        }
+
+        isSubmitting = true;
+        StateHasChanged();
+
+        // TODO: Implement actual booking submission logic here
+        // This could be an API call to save the booking
+        await Task.Delay(1500);
+
+        // TODO: Show success message using your preferred notification system
+        // Navigate to confirmation page or show success message
+
+        // Reset form
+        bookingModel = new BookingModel();
+        isSubmitting = false;
+    }
+
+    public class BookingModel
+    {
+        [Required(ErrorMessage = "First name is required")]
+        [StringLength(50)]
+        public string FirstName { get; set; } = "";
+
+        [Required(ErrorMessage = "Last name is required")]
+        [StringLength(50)]
+        public string LastName { get; set; } = "";
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        [StringLength(255)]
+        public string Email { get; set; } = "";
+
+        [Required(ErrorMessage = "Phone is required")]
+        [StringLength(20)]
+        public string Phone { get; set; } = "";
+
+        [Required(ErrorMessage = "Please select an apartment")]
+        public string ApartmentId { get; set; } = "";
+
+        [Required]
+        public string RentalType { get; set; } = "daily";
+
+        [Required]
+        public string MealPlan { get; set; } = "bed-only";
+
+        [Required(ErrorMessage = "Check-in date is required")]
+        public DateTime? CheckIn { get; set; }
+
+        [Required(ErrorMessage = "Check-out date is required")]
+        public DateTime? CheckOut { get; set; }
+
+        [Required(ErrorMessage = "Please select number of adults")]
+        [Range(1, 4, ErrorMessage = "At least 1 adult is required")]
+        public int Adults { get; set; }
+
+        [Range(0, 3, ErrorMessage = "Maximum 3 children allowed")]
+        public int Children { get; set; } = 0;
+
+        public int[] ChildrenAges { get; set; } = new int[3];
+
+        [StringLength(1000)]
+        public string SpecialRequests { get; set; } = "";
+
+        public int TotalGuests => Adults + Children;
+    }
+
+    public class PriceSummary
+    {
+        public int Nights { get; set; }
+        public decimal DailyRate { get; set; }
+        public decimal Subtotal { get; set; }
+    }
+}

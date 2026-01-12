@@ -1,10 +1,14 @@
 using GolfViewApartments.Components;
+using Blazored.Toast;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents()
+    
+    ;
+
 
 var app = builder.Build();
 

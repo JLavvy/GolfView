@@ -1,0 +1,167 @@
+@using GolfViewApartments.Models
+
+<div class="space-y-8">
+    <div>
+        <h1 class="text-3xl font-serif text-[#2d5016]">Dashboard Overview</h1>
+        <p class="text-gray-600 mt-1">
+            Welcome back! Here's what's happening at GolfView.
+        </p>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        @foreach (var stat in stats)
+        {
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm text-gray-600">@stat.Title</h3>
+                    @GetStatIcon(stat.Icon)
+                </div>
+                <div>
+                    <div class="text-2xl font-semibold text-gray-900">@stat.Value</div>
+                    <p class="text-xs text-gray-500 mt-1">@stat.Change</p>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Recent Bookings -->
+    <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div class="p-6 border-b border-gray-200">
+            <h3 class="text-2xl font-serif text-gray-900">Recent Bookings</h3>
+        </div>
+        <div class="p-6">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Guest</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Room</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Check In</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Check Out</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var booking in recentBookings)
+                        {
+                            <tr class="border-b border-gray-100 last:border-0">
+                                <td class="py-4 px-4 text-gray-900">@booking.Guest</td>
+                                <td class="py-4 px-4 text-gray-600">@booking.Room</td>
+                                <td class="py-4 px-4 text-gray-600">@booking.CheckIn</td>
+                                <td class="py-4 px-4 text-gray-600">@booking.CheckOut</td>
+                                <td class="py-4 px-4">
+                                    <span class="@GetStatusClass(booking.Status)">
+                                        @booking.Status
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<StatCard> stats = new()
+    {
+        new StatCard { Title = "Total Bookings", Value = "24", Change = "+12%", Icon = "Calendar", Color = "text-[#4a7c3c]" },
+        new StatCard { Title = "Active Guests", Value = "18", Change = "+5%", Icon = "Users", Color = "text-[#c9a961]" },
+        new StatCard { Title = "Revenue (This Month)", Value = "Ksh 450,000", Change = "+18%", Icon = "DollarSign", Color = "text-[#4a7c3c]" },
+        new StatCard { Title = "Available Rooms", Value = "21", Change = "of 39", Icon = "Home", Color = "text-gray-600" }
+    };
+
+    private List<RecentBooking> recentBookings = new()
+    {
+        new RecentBooking { Id = 1, Guest = "John Kamau", Room = "Studio #5", CheckIn = "Dec 18", CheckOut = "Dec 22", Status = "Confirmed" },
+        new RecentBooking { Id = 2, Guest = "Mary Wanjiku", Room = "1 Bedroom #12", CheckIn = "Dec 20", CheckOut = "Dec 25", Status = "Pending" },
+        new RecentBooking { Id = 3, Guest = "David Ochieng", Room = "2 Bedroom #8", CheckIn = "Dec 21", CheckOut = "Jan 5", Status = "Confirmed" },
+        new RecentBooking { Id = 4, Guest = "Sarah Muthoni", Room = "Studio #3", CheckIn = "Dec 23", CheckOut = "Dec 28", Status = "Confirmed" }
+    };
+
+    private RenderFragment GetStatIcon(string iconName) => builder =>
+    {
+        var colorClass = stats.FirstOrDefault(s => s.Icon == iconName)?.Color ?? "text-[#4a7c3c]";
+        builder.OpenElement(0, "svg");
+        builder.AddAttribute(1, "class", $"w-5 h-5 {colorClass}");
+        builder.AddAttribute(2, "fill", "none");
+        builder.AddAttribute(3, "stroke", "currentColor");
+        builder.AddAttribute(4, "viewBox", "0 0 24 24");
+        builder.AddAttribute(5, "stroke-width", "2");
+        builder.AddAttribute(6, "stroke-linecap", "round");
+        builder.AddAttribute(7, "stroke-linejoin", "round");
+
+        switch (iconName)
+        {
+            case "Calendar":
+                builder.OpenElement(8, "path");
+                builder.AddAttribute(9, "d", "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z");
+                builder.CloseElement();
+                break;
+            case "Users":
+                builder.OpenElement(8, "path");
+                builder.AddAttribute(9, "d", "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2");
+                builder.CloseElement();
+                builder.OpenElement(10, "circle");
+                builder.AddAttribute(11, "cx", "9");
+                builder.AddAttribute(12, "cy", "7");
+                builder.AddAttribute(13, "r", "4");
+                builder.CloseElement();
+                builder.OpenElement(14, "path");
+                builder.AddAttribute(15, "d", "M23 21v-2a4 4 0 0 0-3-3.87");
+                builder.CloseElement();
+                builder.OpenElement(16, "path");
+                builder.AddAttribute(17, "d", "M16 3.13a4 4 0 0 1 0 7.75");
+                builder.CloseElement();
+                break;
+            case "DollarSign":
+                builder.OpenElement(8, "line");
+                builder.AddAttribute(9, "x1", "12");
+                builder.AddAttribute(10, "y1", "1");
+                builder.AddAttribute(11, "x2", "12");
+                builder.AddAttribute(12, "y2", "23");
+                builder.CloseElement();
+                builder.OpenElement(13, "path");
+                builder.AddAttribute(14, "d", "M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6");
+                builder.CloseElement();
+                break;
+            case "Home":
+                builder.OpenElement(8, "path");
+                builder.AddAttribute(9, "d", "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z");
+                builder.CloseElement();
+                builder.OpenElement(10, "polyline");
+                builder.AddAttribute(11, "points", "9 22 9 12 15 12 15 22");
+                builder.CloseElement();
+                break;
+        }
+        builder.CloseElement();
+    };
+
+    private string GetStatusClass(string status)
+    {
+        return status == "Confirmed"
+            ? "inline-block px-3 py-1 rounded-full text-xs font-medium bg-[#e8f5e9] text-[#2d5016]"
+            : "inline-block px-3 py-1 rounded-full text-xs font-medium bg-[#fff8e1] text-[#c9a961]";
+    }
+
+    private class StatCard
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
+        public string Change { get; set; } = string.Empty;
+        public string Icon { get; set; } = string.Empty;
+        public string Color { get; set; } = string.Empty;
+    }
+
+    private class RecentBooking
+    {
+        public int Id { get; set; }
+        public string Guest { get; set; } = string.Empty;
+        public string Room { get; set; } = string.Empty;
+        public string CheckIn { get; set; } = string.Empty;
+        public string CheckOut { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+    }
+}

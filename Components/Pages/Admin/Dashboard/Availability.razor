@@ -1,0 +1,166 @@
+@using GolfViewApartments.Models
+@inject IJSRuntime JS
+
+<div class="space-y-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-heading text-primary">Room Availability</h1>
+            <p class="text-muted-foreground font-body mt-1">
+                Click on a room to toggle its availability.
+            </p>
+        </div>
+        <button class="btn-primary gap-2 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
+                @onclick="HandleSave">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+            Save Changes
+        </button>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid sm:grid-cols-3 gap-6">
+        <div class="bg-primary/10 border-primary/20 rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="p-6 pt-6">
+                <div class="flex items-center gap-4">
+                    <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <p class="text-3xl font-heading text-primary">@availableCount</p>
+                        <p class="text-sm text-muted-foreground font-body">Available</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-destructive/10 border-destructive/20 rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="p-6 pt-6">
+                <div class="flex items-center gap-4">
+                    <svg class="w-10 h-10 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <p class="text-3xl font-heading text-destructive">@occupiedCount</p>
+                        <p class="text-sm text-muted-foreground font-body">Occupied</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-accent/10 border-accent/20 rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="p-6 pt-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-accent flex items-center justify-center text-accent-foreground font-heading">
+                        @rooms.Count
+                    </div>
+                    <div>
+                        <p class="text-3xl font-heading">@rooms.Count</p>
+                        <p class="text-sm text-muted-foreground font-body">Total Rooms</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Room Grid by Type -->
+    @foreach (var group in groupedByType)
+    {
+        var typeRooms = group.Value;
+        <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="flex flex-col space-y-1.5 p-6">
+                <h3 class="font-heading flex items-center justify-between text-2xl font-semibold leading-none tracking-tight">
+                    <span>@group.Key</span>
+                    <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 font-body">
+                        @typeRooms.Count(r => r.Available) / @typeRooms.Count available
+                    </span>
+                </h3>
+            </div>
+            <div class="p-6 pt-0">
+                <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-13 gap-2">
+                    @foreach (var room in typeRooms)
+                    {
+                        <button @onclick="() => ToggleAvailability(room.Id)"
+                                class="@GetRoomClass(room.Available) p-3 rounded-lg text-center font-body text-sm transition-all">
+                            @room.Number
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Legend -->
+    <div class="flex items-center gap-6 text-sm font-body">
+        <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-primary"></div>
+            <span>Available</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-destructive/20"></div>
+            <span>Occupied</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Room> rooms = new();
+    private int availableCount => rooms.Count(r => r.Available);
+    private int occupiedCount => rooms.Count - availableCount;
+
+    private Dictionary<string, List<Room>> groupedByType => new()
+    {
+        { "Studio", rooms.Where(r => r.Type == "Studio").ToList() },
+        { "1 Bedroom", rooms.Where(r => r.Type == "1 Bedroom").ToList() },
+        { "2 Bedroom", rooms.Where(r => r.Type == "2 Bedroom").ToList() }
+    };
+
+    protected override void OnInitialized()
+    {
+        rooms = GenerateRooms();
+    }
+
+    private List<Room> GenerateRooms()
+    {
+        var roomList = new List<Room>();
+        var types = new[] { "Studio", "1 Bedroom", "2 Bedroom" };
+        var random = new Random();
+
+        for (int i = 1; i <= 39; i++)
+        {
+            var floor = (int)Math.Ceiling(i / 13.0);
+            var typeIndex = (i - 1) % 3;
+            var roomNumber = $"{floor}{((i - 1) % 13) + 1:D2}";
+
+            roomList.Add(new Room
+            {
+                Id = i,
+                Number = roomNumber.Length > 3 ? roomNumber.Substring(roomNumber.Length - 3) : roomNumber.PadLeft(3, '0'),
+                Type = types[typeIndex],
+                Floor = floor,
+                Available = random.NextDouble() > 0.4
+            });
+        }
+
+        return roomList;
+    }
+
+    private void ToggleAvailability(int id)
+    {
+        var room = rooms.FirstOrDefault(r => r.Id == id);
+        if (room != null)
+        {
+            room.Available = !room.Available;
+        }
+    }
+
+    private async Task HandleSave()
+    {
+        await JS.InvokeVoidAsync("alert", "Room availability updated!");
+    }
+
+    private string GetRoomClass(bool available)
+    {
+        return available
+            ? "bg-primary text-primary-foreground hover:bg-primary/80"
+            : "bg-destructive/20 text-destructive hover:bg-destructive/30";
+    }
+}

@@ -1,0 +1,103 @@
+@inject IJSRuntime JS
+
+<div class="space-y-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-heading text-primary">Photo Gallery</h1>
+            <p class="text-muted-foreground font-body mt-1">
+                Manage property photos displayed on the website.
+            </p>
+        </div>
+        <button class="btn-accent gap-2 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-accent text-accent-foreground hover:bg-accent/90 h-10 px-4 py-2"
+                @onclick="HandleUpload">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Add Photo
+        </button>
+    </div>
+
+    <!-- Upload Area -->
+    <div class="border-dashed rounded-lg border bg-card text-card-foreground shadow-sm">
+        <div class="p-6 py-12">
+            <div class="text-center">
+                <svg class="w-12 h-12 mx-auto text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <p class="text-lg font-heading mb-2">Upload Photos</p>
+                <p class="text-sm text-muted-foreground font-body mb-4">
+                    Drag and drop images here, or click to select files
+                </p>
+                <button class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                        @onclick="HandleUpload">
+                    Select Files
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photos Grid -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        @foreach (var photo in photos)
+        {
+            <div class="overflow-hidden group rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div class="relative aspect-video">
+                    <img src="@photo.Url" alt="@photo.Title" class="w-full h-full object-cover" />
+                    <div class="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/50 transition-colors flex items-center justify-center">
+                        <button class="opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-destructive text-destructive-foreground hover:bg-destructive/90 h-10 w-10"
+                                @onclick="() => HandleDelete(photo.Id)">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6 p-4">
+                    <p class="font-body font-medium">@photo.Title</p>
+                    <p class="text-sm text-muted-foreground font-body">@photo.Category</p>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (photos.Count == 0)
+    {
+        <div class="py-16 rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div class="p-6 text-center">
+                <svg class="w-16 h-16 mx-auto text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <p class="text-lg font-heading">No photos yet</p>
+                <p class="text-muted-foreground font-body">Upload photos to showcase your property</p>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Photo> photos = new()
+    {
+        new Photo { Id = 1, Url = "/images/studio-apartment.jpg", Category = "Studio", Title = "Studio Apartment Interior" },
+        new Photo { Id = 2, Url = "/images/one-bedroom.jpg", Category = "1 Bedroom", Title = "One Bedroom Living Area" },
+        new Photo { Id = 3, Url = "/images/two-bedroom.jpg", Category = "2 Bedroom", Title = "Two Bedroom Suite" }
+    };
+
+    private async Task HandleDelete(int id)
+    {
+        photos.RemoveAll(p => p.Id == id);
+        await JS.InvokeVoidAsync("alert", "Photo deleted");
+    }
+
+    private async Task HandleUpload()
+    {
+        await JS.InvokeVoidAsync("alert", "Photo upload will be available with file upload integration");
+    }
+
+    private class Photo
+    {
+        public int Id { get; set; }
+        public string Url { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+    }
+}

@@ -1,0 +1,174 @@
+@using GolfViewApartments.Models
+@inject IJSRuntime JS
+
+<div class="space-y-8">
+
+    <div>
+        <h1 class="text-3xl font-heading text-primary">Booking Management</h1>
+        <p class="text-muted-foreground">View and manage booking requests</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="rounded-lg border bg-card p-4">
+        <div class="flex gap-4 flex-col md:flex-row">
+            <input class="flex-1 h-10 px-3 rounded-md border"
+                   placeholder="Search guest, email or room"
+                   @oninput="e => searchTerm = e.Value?.ToString() ?? string.Empty" />
+
+            <select class="h-10 px-3 rounded-md border"
+                    @onchange="e => statusFilter = e.Value?.ToString() ??  string.Empty">
+                <option value="all">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="rounded-lg border bg-card p-4 overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="border-b">
+                <tr>
+                    <th class="text-left p-2">Guest</th>
+                    <th class="text-left p-2">Room</th>
+                    <th class="text-left p-2">Dates</th>
+                    <th class="text-left p-2">Guests</th>
+                    <th class="text-left p-2">Status</th>
+                    <th class="text-left p-2">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var booking in FilteredBookings)
+                {
+                    <tr class="border-b last:border-0">
+
+                        <td class="p-2">
+                            <div class="font-medium">@booking.Guest</div>
+                            <div class="text-xs text-muted-foreground">@booking.Email</div>
+                            <div class="text-xs text-muted-foreground">@booking.Phone</div>
+                        </td>
+
+                        <td class="p-2">@booking.Room</td>
+
+                        <td class="p-2">
+                            <div>@booking.CheckIn</div>
+                            <div class="text-muted-foreground">to @booking.CheckOut</div>
+                        </td>
+
+                        <td class="p-2">
+                            @booking.Adults Adults, @booking.Children Children
+                        </td>
+
+                        <td class="p-2">
+                            <span class="@GetStatusClass(booking.Status)">
+                                @booking.Status
+                            </span>
+                        </td>
+
+                        <td class="p-2 space-x-2">
+                            @if (booking.Status == BookingStatus.Pending)
+                            {
+                                <button class="px-3 py-1 text-xs border rounded"
+                                        @onclick="() => UpdateStatus(booking.Id, BookingStatus.Confirmed)">
+                                    Confirm
+                                </button>
+
+                                <button class="px-3 py-1 text-xs border rounded text-red-600"
+                                        @onclick="() => UpdateStatus(booking.Id, BookingStatus.Cancelled)">
+                                    Cancel
+                                </button>
+                            }
+
+                            @if (booking.Status == BookingStatus.Confirmed)
+                            {
+                                <button class="px-3 py-1 text-xs border rounded"
+                                        @onclick="() => UpdateStatus(booking.Id, BookingStatus.Completed)">
+                                    Complete
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (!FilteredBookings.Any())
+        {
+            <div class="text-center py-10 text-muted-foreground">
+                No bookings found
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+
+    private List<AdBooking> bookings = new();
+    private string searchTerm = "";
+    private string statusFilter = "all";
+
+    protected override void OnInitialized()
+    {
+        bookings = new ()
+        {
+            new AdBooking
+            {
+                Id = 1,
+                Guest = "Mary Wanjiku",
+                Email = "mary@email.com",
+                Phone = "+254700000000",
+                Room = "Studio #3",
+                CheckIn = "2024-12-20",
+                CheckOut = "2024-12-25",
+                Adults = 2,
+                Children = 1,
+                Status = BookingStatus.Pending,
+                CreatedAt = "2024-12-15"
+            },
+            new AdBooking
+            {
+                Id = 2,
+                Guest = "John Kamau",
+                Email = "john@email.com",
+                Phone = "+254711111111",
+                Room = "1 Bedroom #7",
+                CheckIn = "2024-12-15",
+                CheckOut = "2024-12-17",
+                Adults = 2,
+                Children = 0,
+                Status = BookingStatus.Confirmed,
+                CreatedAt = "2024-12-10"
+            }
+        };
+    }
+
+    private List<AdBooking> FilteredBookings =>
+        bookings.Where(b =>
+            (string.IsNullOrWhiteSpace(searchTerm)
+                || b.Guest.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                || b.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                || b.Room.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+            && (statusFilter == "all" || b.Status.ToString() == statusFilter)
+        ).ToList();
+
+    private async Task UpdateStatus(int id, BookingStatus status)
+    {
+        var booking = bookings.FirstOrDefault(b => b.Id == id);
+        if (booking == null) return;
+
+        booking.Status = status;
+        await JS.InvokeVoidAsync("alert", $"Booking marked as {status}");
+    }
+
+    private string GetStatusClass(BookingStatus status) => status switch
+    {
+        BookingStatus.Pending => "px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-800",
+        BookingStatus.Confirmed => "px-2 py-1 text-xs rounded bg-blue-100 text-blue-800",
+        BookingStatus.Completed => "px-2 py-1 text-xs rounded bg-green-100 text-green-800",
+        BookingStatus.Cancelled => "px-2 py-1 text-xs rounded bg-red-100 text-red-800",
+        _ => ""
+    };
+}

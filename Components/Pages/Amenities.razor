@@ -1,0 +1,214 @@
+@page "/amenities"
+@using GolfViewApartments.Data
+@using GolfViewApartments.Models
+
+<div>
+    <!-- Hero Section -->
+    <section class="relative h-[50vh] min-h-[400px] flex items-center">
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('/images/amenity-pool.jpg')">
+            <div class="absolute inset-0 bg-primary/50"></div>
+        </div>
+        <div class="relative w-full container mx-auto px-4 sm:px-2 md:px-14 lg:px-18 xl:px-[88px] max-w-[1440px]">
+            <div class="max-w-2xl">
+                <h1 class="text-4xl md:text-5xl font-heading font-bold text-white mb-4">
+                    Amenities & Facilities
+                </h1>
+                <p class="text-white font-body text-lg">
+                    Discover world-class amenities designed to enhance your stay.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tabs Section -->
+    <section class="py-16">
+        <div class="container mx-auto px-4 md:px-14 max-w-[1440px]">
+
+            <!-- Tab Buttons -->
+            <div class="flex justify-center mb-20 gap-2 flex-wrap">
+                <button @onclick="() => ActiveTab = 0"
+                        class="px-6 py-2 rounded-lg font-body font-medium transition
+                               @(ActiveTab == 0 ? "bg-primary text-black" : "bg-secondary text-muted-foreground")">
+                    Amenities
+                </button>
+
+                <button @onclick="() => ActiveTab = 1"
+                        class="px-6 py-2 rounded-lg font-body font-medium transition
+                               @(ActiveTab == 1 ? "bg-primary text-black" : "bg-secondary text-muted-foreground")">
+                    Facility Rates
+                </button>
+
+                <button @onclick="() => ActiveTab = 2"
+                        class="px-6 py-2 rounded-lg font-body font-medium transition
+                               @(ActiveTab == 2 ? "bg-primary text-black" : "bg-secondary text-muted-foreground")">
+                    Conference Packages
+                </button>
+            </div>
+
+            <!-- TAB 1: Amenities -->
+            @if (ActiveTab == 0)
+            {
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    @foreach (var amenity in detailedAmenities)
+                    {
+                        <div class="bg-card rounded-lg p-4 shadow-soft hover:shadow-elegant transition flex gap-4">
+                            <div class="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <i class="@amenity.Icon text-xl text-primary"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-heading font-semibold text-black mb-1">
+                                    @amenity.Title
+                                </h3>
+                                <p class="text-xs text-muted-foreground font-body">
+                                    @amenity.Description
+                                </p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- TAB 2: Facility Rates -->
+            @if (ActiveTab == 1)
+            {
+                <div class="max-w-4xl mx-auto bg-card rounded-xl shadow-elegant overflow-hidden">
+                    <div class="bg-primary p-6">
+                        <h3 class="font-heading text-xl font-semibold">
+                            Facility Rates (KES)
+                        </h3>
+                        <p class="text-sm font-body">
+                            Available for all guests
+                        </p>
+                    </div>
+
+                    <div class="p-6 space-y-4">
+                        @foreach (var amenity in amenityPricing)
+                        {
+                            <div class="flex justify-between items-center p-4 bg-secondary rounded-lg">
+                                <div class="flex gap-4 items-center">
+                                    <div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <i class="@GetPricingIcon(amenity.Id) text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-heading font-semibold text-black">
+                                            @amenity.Name
+                                        </p>
+                                        <p class="text-sm text-muted-foreground font-body">
+                                            @amenity.Description
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="text-right text-sm font-body">
+                                    @if (amenity.DailyPrice.HasValue)
+                                    {
+                                        <p>
+                                            <span class="font-semibold">@amenity.DailyPrice.Value.ToString("N0")</span>
+                                            <span class="text-muted-foreground"> /day</span>
+                                        </p>
+                                    }
+                                    @if (amenity.MonthlyPrice.HasValue)
+                                    {
+                                        <p>
+                                            <span class="font-semibold">@amenity.MonthlyPrice.Value.ToString("N0")</span>
+                                            <span class="text-muted-foreground"> /month</span>
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- TAB 3: Conference Packages -->
+            @if (ActiveTab == 2)
+            {
+                <div class="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+                    @foreach (var pkg in conferencePackages)
+                    {
+                        <div class="bg-card border border-border rounded-lg p-6 hover:shadow-soft transition">
+                            <div class="flex justify-between mb-4">
+                                <h4 class="font-heading font-semibold text-black">
+                                    @pkg.Name
+                                </h4>
+                                <div>
+                                    <span class="text-2xl font-heading font-bold text-primary">
+                                        @pkg.PricePerPerson.ToString("N0")
+                                    </span>
+                                    <span class="text-sm text-muted-foreground">/person</span>
+                                </div>
+                            </div>
+
+                            <p class="text-sm text-muted-foreground font-body mb-4">
+                                @pkg.Description
+                            </p>
+
+                            <ul class="grid grid-cols-2 gap-1 text-xs font-body text-muted-foreground">
+                                @foreach (var item in pkg.Includes)
+                                {
+                                    <li class="flex items-center gap-1">
+                                        <span class="h-1 w-1 bg-primary rounded-full"></span>
+                                        @item
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-16 bg-primary/10 text-center">
+        <h2 class="text-2xl md:text-3xl font-heading font-bold text-primary-foreground mb-4">
+            Ready to Experience Our Amenities?
+        </h2>
+        <p class="font-body max-w-xl mx-auto mb-6">
+            Book your stay today and enjoy full access to our facilities.
+        </p>
+        <a href="/booking"
+           class="inline-block px-8 py-3 bg-primary text-black font-semibold rounded-lg hover:bg-primary/10 hover:text-white transition">
+            Book Your Stay
+        </a>
+    </section>
+</div>
+
+@code {
+    private int ActiveTab = 0;
+
+    private List<Feature> detailedAmenities = new();
+    private List<AmenityPricing> amenityPricing = new();
+    private List<ConferencePackage> conferencePackages = new();
+
+    protected override void OnInitialized()
+    {
+        detailedAmenities = new List<Feature>
+        {
+            new Feature { Title = "WiFi", Description = "Free high speed internet available", Icon = "fas fa-wifi" },
+            new Feature { Title = "Housekeeping", Description = "Cleaning of rooms is done on a daily basis", Icon = "fas fa-broom" },
+            new Feature { Title = "Restaurant", Description = "State-of-the-art restaurant & bar that closes at 10pm", Icon = "fas fa-utensils" },
+            new Feature { Title = "Parking", Description = "Ample & secure parking", Icon = "fas fa-parking" },
+            new Feature { Title = "Security", Description = "24 hour security services and mobile response team", Icon = "fas fa-shield-alt" },
+            new Feature { Title = "Back-up Power", Description = "No power, no worries. We have reliable power back-up", Icon = "fas fa-bolt" },
+            new Feature { Title = "Gym", Description = "Well equipped gym with personal trainer", Icon = "fas fa-dumbbell" },
+            new Feature { Title = "Accessible", Description = "Ground floor is equipped to cater for persons with disability", Icon = "fas fa-wheelchair" },
+            new Feature { Title = "Pool", Description = "Swimming pool to cool down on those hot days", Icon = "fas fa-swimming-pool" },
+            new Feature { Title = "Sauna", Description = "Steam and sauna for ultimate relaxation", Icon = "fas fa-hot-tub" },
+            new Feature { Title = "Front Desk", Description = "Round-the-clock front desk assistance", Icon = "fas fa-concierge-bell" },
+            new Feature { Title = "Lifts", Description = "High speed elevators to service all floors", Icon = "fas fa-elevator" }
+        };
+
+        amenityPricing = AmenitiesData.GetAmenityPricing();
+        conferencePackages = AmenitiesData.GetConferencePackages();
+    }
+
+    private string GetPricingIcon(string amenityId) => amenityId switch
+    {
+        "gym" => "fas fa-dumbbell",
+        "pool" => "fas fa-swimming-pool",
+        "sauna" => "fas fa-hot-tub",
+        _ => "fas fa-star"
+    };
+}

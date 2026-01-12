@@ -6,50 +6,43 @@
         <h3 class="font-heading text-xl font-semibold text-primary-foreground">
             Room Rates (KES)
         </h3>
-        <p class="text-sm text-primary-foreground/80 mt-1">
+        <p class="text-sm font-body text-black mt-1">
             All rooms feature 5x6 beds • Prices in Kenyan Shillings
         </p>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full">
             <thead>
-                <tr class="bg-secondary">
-                    <th class="text-left p-4 font-heading font-semibold text-foreground">Room Type</th>
-                    <th class="text-center p-4 font-heading font-semibold text-foreground">Daily B/O</th>
-                    <th class="text-center p-4 font-heading font-semibold text-foreground">Daily B+B</th>
-                    <th class="text-center p-4 font-heading font-semibold text-foreground">Monthly B/O</th>
-                    <th class="text-center p-4 font-heading font-semibold text-foreground">Monthly B+B</th>
+                <tr>
+                    <th class="text-left p-4 font-heading font-semibold text-black">Room Type</th>
+                    <th class="text-center p-4 font-heading font-semibold text-black">Daily B/O</th>
+                    <th class="text-center p-4 font-heading font-semibold text-black">Daily B+B</th>
+                    <th class="text-center p-4 font-heading font-semibold text-black">Monthly B/O</th>
+                    <th class="text-center p-4 font-heading font-semibold text-black">Monthly B+B</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-border">
+            <tbody class="divide-y divide-border font-body">
                 @foreach (var apt in ApartmentData.Apartments)
                 {
-                    <tr class="hover:bg-secondary/50 transition-colors">
+                    <tr class="hover:bg-primary/10 transition-colors">
                         <td class="p-4">
                             <div class="flex items-start gap-3">
                                 <img src="@apt.Image"
                                      alt="@apt.Name"
                                      class="w-16 h-12 object-cover rounded" />
                                 <div>
-                                    <p class="font-semibold text-foreground">@apt.Name</p>
+                                    <p class="font-semibold text-black">@apt.Name</p>
                                     <div class="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                                         <span class="flex items-center gap-1">
-                                            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <rect x="3" y="3" width="18" height="18" rx="2" />
-                                                <path d="M3 9h18M9 21V9" />
-                                            </svg>
+                                            <i class="fas fa-expand"></i>
                                             @apt.Size
                                         </span>
                                         <span class="flex items-center gap-1">
-                                            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                                            </svg>
+                                            <i class="fas fa-users"></i>
                                             Max @apt.MaxGuests
                                         </span>
                                         <span class="flex items-center gap-1">
-                                            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9" />
-                                            </svg>
+                                            <i class="fas fa-bed"></i>
                                             @apt.BedSize
                                         </span>
                                     </div>
@@ -57,23 +50,23 @@
                             </div>
                         </td>
                         <td class="p-4 text-center">
-                            <span class="font-semibold text-foreground">@apt.Pricing.DailyBedOnly.ToString("N0")</span>
+                            <span class="font-semibold text-muted-foreground">@apt.Pricing.DailyBedOnly.ToString("N0")</span>
                         </td>
                         <td class="p-4 text-center">
-                            <span class="font-semibold text-foreground">@apt.Pricing.DailyBB.ToString("N0")</span>
+                            <span class="font-semibold text-muted-foreground">@apt.Pricing.DailyBB.ToString("N0")</span>
                         </td>
                         <td class="p-4 text-center">
-                            <span class="font-semibold text-foreground">@apt.Pricing.MonthlyBedOnly.ToString("N0")</span>
+                            <span class="font-semibold text-muted-foreground">@apt.Pricing.MonthlyBedOnly.ToString("N0")</span>
                         </td>
                         <td class="p-4 text-center">
-                            <span class="font-semibold text-foreground">@apt.Pricing.MonthlyBB.ToString("N0")</span>
+                            <span class="font-semibold text-muted-foreground">@apt.Pricing.MonthlyBB.ToString("N0")</span>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
-    <div class="p-4 bg-secondary text-sm text-muted-foreground">
+    <div class="p-4 text-sm text-muted-foreground font-body">
         <p><strong>B/O</strong> = Bed Only | <strong>B+B</strong> = Bed & Breakfast</p>
     </div>
 </div>

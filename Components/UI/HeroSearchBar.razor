@@ -1,0 +1,97 @@
+@using GolfViewApartments.Data
+@using GolfViewApartments.Models
+@inject NavigationManager Navigation
+
+<div class="bg-white rounded-2xl shadow-lg p-6 max-w-5xl mx-auto font-body">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+        <!-- Check-in Date -->
+        <div class="space-y-2">
+            <label class="block text-sm font-medium text-muted-foreground">
+                Check-in
+            </label>
+            <div class="relative">
+                <input type="date" 
+                       @bind="CheckIn" 
+                       min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                       class="w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+            </div>
+        </div>
+
+        <!-- Check-out Date -->
+        <div class="space-y-2">
+            <label class="block text-sm font-medium text-muted-foreground">
+                Check-out
+            </label>
+            <div class="relative">
+                <input type="date" 
+                @bind="CheckOut" 
+                min="@GetMinCheckOutDate()"
+                class="w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:none focus:border-transparent" />
+            </div>
+        </div>
+
+        <!-- Adults -->
+        <div class="space-y-2">
+            <label class="block text-sm font-medium text-muted-foreground">
+                Adults
+            </label>
+            <select @bind="Adults" class="w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:none focus:border-transparent">
+                @for (int i = 1; i <= 4; i++)
+                {
+                    <option value="@i">@i Adult@(i > 1 ? "s" : "")</option>
+                }
+            </select>
+        </div>
+
+        <!-- Children -->
+        <div class="space-y-2">
+            <label class="block text-sm font-medium text-muted-foreground">
+                Children
+            </label>
+            <select @bind="Children" class="w-full h-12 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                @for (int i = 0; i <= 3; i++)
+                {
+                    <option value="@i">@i Child@(i != 1 ? "ren" : "")</option>
+                }
+            </select>
+        </div>
+
+        <!-- Search Button -->
+        <button @onclick="HandleSearch" 
+                disabled="@(!CheckIn.HasValue || !CheckOut.HasValue)"
+                class="h-12 w-full bg-accent text-white font-semibold rounded-lg disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            Search
+        </button>
+    </div>
+</div>
+
+@code {
+    private DateTime? CheckIn { get; set; }
+    private DateTime? CheckOut { get; set; }
+    private int Adults { get; set; } = 0;
+    private int Children { get; set; } = 0;
+
+    private string GetMinCheckOutDate()
+    {
+        if (CheckIn.HasValue)
+        {
+            return CheckIn.Value.AddDays(1).ToString("yyyy-MM-dd");
+        }
+        return DateTime.Today.ToString("yyyy-MM-dd");
+    }
+
+    private void HandleSearch()
+    {
+        if (!CheckIn.HasValue || !CheckOut.HasValue) return;
+
+        var queryParams = $"?checkIn={CheckIn.Value:yyyy-MM-dd}" +
+                         $"&checkOut={CheckOut.Value:yyyy-MM-dd}" +
+                         $"&adults={Adults}" +
+                         $"&children={Children}";
+        
+        Navigation.NavigateTo($"/search-results{queryParams}");
+    }
+}
