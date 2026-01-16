@@ -1,162 +1,275 @@
-@using GolfViewApartments.Models
-@inject IJSRuntime JS
+@page "/admin/dashboard/pricing"
+@layout Pages.Admin.Dashboard.Layout
 
-<div class="space-y-8">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-            <h1 class="text-3xl font-heading text-primary">Room Pricing</h1>
+<div class="space-y-6 animate-fade-in">
+
+    <!-- Header -->
+    <div class="flex flex-wrap items-center gap-4">
+        <div class="flex-1 min-w-0">
+            <h2 class="text-2xl font-bold font-heading">Pricing</h2>
             <p class="text-muted-foreground font-body mt-1">
-                Update room rates (prices in Kenyan Shillings).
+                Manage room rates and amenity pricing
             </p>
         </div>
-        <button class="btn-primary gap-2 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
-                @onclick="HandleSave">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-            </svg>
-            Save Changes
-        </button>
+
+        <div class="flex items-center gap-3 ml-auto">
+            <button
+                class="bg-primary hover:bg-primary/20 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
+                @onclick="SaveChanges"
+                disabled="@isSaving">
+
+                @if (isSaving)
+                {
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                }
+                else
+                {
+                    <i class="fa-solid fa-floppy-disk"></i>
+                }
+
+                @(isSaving ? "Saving..." : "Save Changes")
+            </button>
+        </div>
     </div>
 
-    <div class="grid gap-6">
+    @if (saveMessage != null)
+    {
+        <div class="bg-primary border border-gray-200 text-white rounded-lg p-4">
+            <p class="text-sm font-medium font-body">@saveMessage</p>
+        </div>
+    }
+
+    <!-- Quick Stats -->
+    <div class="grid sm:grid-cols-1 lg:grid-cols-3 gap-4 bg-white">
+        <div class="border border-gray-200 rounded-xl p-5">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 rounded-xl bg-primary/10">
+                    <i class="fa-solid fa-dollar-sign text-primary"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-muted-foreground font-body">Avg. Daily Rate</p>
+                    <p class="text-2xl font-heading">
+                        Ksh @CalculateAverageDailyRate().ToString("N0")
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-xl p-5">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 rounded-xl bg-accent/10">
+                    <i class="fa-solid fa-arrow-trend-up text-accent"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-muted-foreground font-body">Revenue Potential</p>
+                    <p class="text-2xl font-heading">Ksh 325K</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="border border-gray-200 rounded-xl bg-gradient-to-br from-blue-50 to-transparent p-5">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 rounded-xl bg-primary/10">
+                    <i class="fa-solid fa-clock text-primary"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-muted-foreground font-body">Last Updated</p>
+                    <p class="text-2xl font-heading">@lastUpdated</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Room Rates -->
+    <div class="space-y-4">
+        <div class="flex items-center gap-2">
+            <h3 class="text-lg font-semibold font-body">Room Rates</h3>
+            <span class="px-2 py-1 text-sm border border-gray-200 rounded font-bold font-body">KES</span>
+        </div>
+
         @foreach (var rate in rates)
         {
-            <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-                <div class="flex flex-col space-y-1.5 p-6">
-                    <h3 class="font-heading text-xl font-semibold leading-none tracking-tight">@rate.Name</h3>
+            <div class="border border-gray-200 rounded-xl bg-white hover:border-gray-300 transition-colors">
+
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex items-center gap-3">
+                        <i class="@rate.IconClass text-lg text-primary"></i>
+                        <h4 class="text-lg font-semibold">@rate.Name</h4>
+                    </div>
                 </div>
-                <div class="p-6 pt-0">
-                    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div class="space-y-2">
-                            <label class="font-body text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                Daily (Bed Only)
-                            </label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Ksh</span>
-                                <input type="number"
-                                       value="@rate.DailyBedOnly"
-                                       @onchange="@(e => UpdateRate(rate.Id, nameof(rate.DailyBedOnly), e.Value?.ToString() ?? ""))"
-                                       class="pl-12 bg-secondary flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="font-body text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                Daily (B&B)
-                            </label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Ksh</span>
-                                <input type="number"
-                                       value="@rate.DailyBnB"
-                                       @onchange="@(e => UpdateRate(rate.Id, nameof(rate.DailyBnB), e.Value?.ToString() ?? ""))"
-                                       class="pl-12 bg-secondary flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="font-body text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                Monthly (Bed Only)
-                            </label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Ksh</span>
-                                <input type="number"
-                                       value="@rate.MonthlyBedOnly"
-                                       @onchange="@(e => UpdateRate(rate.Id, nameof(rate.MonthlyBedOnly), e.Value?.ToString() ?? ""))"
-                                       class="pl-12 bg-secondary flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="font-body text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                Monthly (B&B)
-                            </label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Ksh</span>
-                                <input type="number"
-                                       value="@rate.MonthlyBnB"
-                                       @onchange="@(e => UpdateRate(rate.Id, nameof(rate.MonthlyBnB), e.Value?.ToString() ?? ""))"
-                                       class="pl-12 bg-secondary flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" />
-                            </div>
+
+                <div class="p-6 grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+
+                    <div class="space-y-2">
+                        <label class="text-sm uppercase tracking-wider text-muted-foreground font-body flex items-center gap-2">
+                            <i class="fa-solid fa-bed text-primary"></i>
+                            Daily (Bed Only)
+                        </label>
+                        <div class="relative">
+
+                            <input type="number" @bind="rate.DailyBedOnly" @bind:event="oninput"
+                                   class="w-full pl-12 px-4 py-2 bg-card border border-gray-200 rounded-lg font-medium" />
                         </div>
                     </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm uppercase tracking-wider text-muted-foreground font-body flex items-center gap-2">
+                            <i class="fa-solid fa-mug-hot text-primary"></i>
+                            Daily (B&B)
+                        </label>
+                        <div class="relative">
+
+                            <input type="number" @bind="rate.DailyBnB" @bind:event="oninput"
+                                   class="w-full pl-12 px-4 py-2 bg-card border border-gray-200 rounded-lg font-medium" />
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm uppercase tracking-wider text-muted-foreground font-body flex items-center gap-2">
+                            <i class="fa-solid fa-calendar text-primary"></i>
+                            Monthly (Bed Only)
+                        </label>
+                        <div class="relative">
+                            
+                            <input type="number" @bind="rate.MonthlyBedOnly" @bind:event="oninput"
+                                   class="w-full pl-12 px-4 py-2 bg-card border border-gray-200 rounded-lg font-medium" />
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-sm uppercase tracking-wider text-muted-foreground font-body flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-check text-primary"></i>
+                            Monthly (B&B)
+                        </label>
+                        <div class="relative">
+                            
+                            <input type="number" @bind="rate.MonthlyBnB" @bind:event="oninput"
+                                   class="w-full pl-12 px-4 py-2 bg-card border border-gray-200 rounded-lg font-medium" />
+                        </div>
+                    </div>
+
                 </div>
             </div>
         }
     </div>
 
     <!-- Amenity Pricing -->
-    <div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-        <div class="flex flex-col space-y-1.5 p-6">
-            <h3 class="font-heading text-xl font-semibold leading-none tracking-tight">Amenity Access Pricing</h3>
-        </div>
-        <div class="p-6 pt-0">
-            <p class="text-muted-foreground font-body mb-4">
-                Rates for non-resident access to facilities.
-            </p>
-            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="space-y-2">
-                    <label class="font-body text-sm font-medium leading-none">Gym (Daily)</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Ksh</span>
-                        <input type="number" value="500" class="pl-12 bg-secondary flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <label class="font-body text-sm font-medium leading-none">Pool (Daily)</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Ksh</span>
-                        <input type="number" value="500" class="pl-12 bg-secondary flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <label class="font-body text-sm font-medium leading-none">Steam Bath (Daily)</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Ksh</span>
-                        <input type="number" value="1000" class="pl-12 bg-secondary flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <label class="font-body text-sm font-medium leading-none">Sauna (Daily)</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">Ksh</span>
-                        <input type="number" value="1000" class="pl-12 bg-secondary flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
-                    </div>
-                </div>
+    <div class="border border-gray-200 rounded-xl bg-white">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold font-heading">Amenity Access</h3>
+                <span class="px-4 py-2 text-sm border border-gray-200 bg-accent text-white rounded">
+                    Non-Resident Rates
+                </span>
             </div>
+            <p class="text-sm text-muted-foreground font-body mt-1">
+                Daily rates for non-resident access to facilities
+            </p>
+        </div>
+
+        <div class="p-6 grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+            @foreach (var amenity in amenities)
+            {
+                <div class="p-4 rounded-xl bg-card border border-gray-200">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="@amenity.IconClass text-xl text-primary"></i>
+                        <span class="font-medium text-sm">@amenity.Name</span>
+                    </div>
+
+                    <div class="relative">
+                       
+                        <input type="number" @bind="amenity.Price" @bind:event="oninput"
+                               class="w-full pl-12 pr-3 py-2 bg-white border border-gray-200 rounded-lg font-medium" />
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
 
 @code {
+    private bool isSaving;
+    private string? saveMessage;
+    private string lastUpdated = "Just now";
+
     private List<RoomRate> rates = new()
     {
-        new RoomRate { Id = 1, Name = "Studio Apartment", DailyBedOnly = "5500", DailyBnB = "6500", MonthlyBedOnly = "75000", MonthlyBnB = "90000" },
-        new RoomRate { Id = 2, Name = "1 Bedroom Apartment", DailyBedOnly = "7500", DailyBnB = "8500", MonthlyBedOnly = "100000", MonthlyBnB = "120000" },
-        new RoomRate { Id = 3, Name = "2 Bedroom Apartment", DailyBedOnly = "12000", DailyBnB = "14000", MonthlyBedOnly = "150000", MonthlyBnB = "180000" }
+        new()
+        {
+            Name = "Studio Apartment",
+            DailyBedOnly = 5500,
+            DailyBnB = 6500,
+            MonthlyBedOnly = 75000,
+            MonthlyBnB = 90000,
+            IconClass = "fa-solid fa-house-chimney"
+        },
+        new()
+        {
+            Name = "1 Bedroom Apartment",
+            DailyBedOnly = 7500,
+            DailyBnB = 8500,
+            MonthlyBedOnly = 100000,
+            MonthlyBnB = 120000,
+            IconClass = "fa-solid fa-house-chimney"
+        },
+        new()
+        {
+            Name = "2 Bedroom Apartment",
+            DailyBedOnly = 12000,
+            DailyBnB = 14000,
+            MonthlyBedOnly = 150000,
+            MonthlyBnB = 180000,
+            IconClass = "fa-solid fa-house-chimney"
+        }
     };
 
-    private void UpdateRate(int id, string field, string value)
+    private List<Amenity> amenities = new()
     {
-        var rate = rates.FirstOrDefault(r => r.Id == id);
-        if (rate != null)
-        {
-            switch (field)
-            {
-                case nameof(RoomRate.DailyBedOnly):
-                    rate.DailyBedOnly = value;
-                    break;
-                case nameof(RoomRate.DailyBnB):
-                    rate.DailyBnB = value;
-                    break;
-                case nameof(RoomRate.MonthlyBedOnly):
-                    rate.MonthlyBedOnly = value;
-                    break;
-                case nameof(RoomRate.MonthlyBnB):
-                    rate.MonthlyBnB = value;
-                    break;
-            }
-        }
+        new() { Name = "Gym Access", IconClass = "fa-solid fa-dumbbell", Price = 500 },
+        new() { Name = "Pool Access", IconClass = "fa-solid fa-person-swimming", Price = 500 },
+        new() { Name = "Steam Bath", IconClass = "fa-solid fa-hot-tub-person", Price = 1000 },
+        new() { Name = "Sauna", IconClass = "fa-solid fa-fire", Price = 1000 }
+    };
+
+    private decimal CalculateAverageDailyRate()
+    {
+        var totalBedOnly = rates.Sum(r => r.DailyBedOnly);
+        var totalBnB = rates.Sum(r => r.DailyBnB);
+        return (totalBedOnly + totalBnB) / (rates.Count * 2);
     }
 
-    private async Task HandleSave()
+    private async Task SaveChanges()
     {
-        await JS.InvokeVoidAsync("alert", "Pricing updated successfully!");
+        isSaving = true;
+        saveMessage = null;
+        StateHasChanged();
+
+        await Task.Delay(1000);
+
+        isSaving = false;
+        saveMessage = "Pricing updated successfully!";
+        lastUpdated = "Just now";
+        StateHasChanged();
+
+        await Task.Delay(3000);
+        saveMessage = null;
+        StateHasChanged();
+    }
+
+    private class RoomRate
+    {
+        public string Name { get; set; } = "";
+        public decimal DailyBedOnly { get; set; }
+        public decimal DailyBnB { get; set; }
+        public decimal MonthlyBedOnly { get; set; }
+        public decimal MonthlyBnB { get; set; }
+        public string IconClass { get; set; } = "";
+    }
+
+    private class Amenity
+    {
+        public string Name { get; set; } = "";
+        public string IconClass { get; set; } = "";
+        public decimal Price { get; set; }
     }
 }

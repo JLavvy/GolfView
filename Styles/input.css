@@ -18,6 +18,7 @@
   --font-body: "DM Sans", system-ui, sans-serif;
 
   --color-card: #F9F8F5; /* Soft off-white for cards */
+  --color-button: #DC2626; /* Light red*/
 }
 
 /* Custom Utilities */
