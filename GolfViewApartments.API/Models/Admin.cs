@@ -1,0 +1,15 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace GolfViewApartments.API.Models;
+
+public class Admin
+{
+    public int Id { get; set; }
+
+    public string Email { get; set; } = string.Empty;
+
+    public string PasswordHash { get; set; } = string.Empty;
+
+    public string Role { get; set; } = "Admin";
+}

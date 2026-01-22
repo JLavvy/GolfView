@@ -1,0 +1,6 @@
+@GolfViewApartments.API_HostAddress = http://localhost:5148
+
+GET {{GolfViewApartments.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
