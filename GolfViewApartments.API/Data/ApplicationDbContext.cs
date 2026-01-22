@@ -5,11 +5,11 @@ namespace GolfViewApartments.API.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
-        
+
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Apartment> Apartments { get; set; }
         public DbSet<Booking> Bookings { get; set; }
@@ -22,30 +22,30 @@ namespace GolfViewApartments.API.Data
         public DbSet<Admin> Admins { get; set; } = null!;
 
 
-        
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            
+
             // Configure relationships
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.Customer)
                 .WithMany(c => c.Bookings)
                 .HasForeignKey(b => b.CustomerId)
                 .OnDelete(DeleteBehavior.Cascade);
-                
+
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.Apartment)
                 .WithMany(a => a.Bookings)
                 .HasForeignKey(b => b.ApartmentId)
                 .OnDelete(DeleteBehavior.Cascade);
-            
+
             modelBuilder.Entity<Room>()
                 .HasOne(r => r.Apartment)
                 .WithMany(a => a.Rooms)
                 .HasForeignKey(r => r.ApartmentId)
                 .OnDelete(DeleteBehavior.Cascade);
-            
+
             // Seed apartment data
             modelBuilder.Entity<Apartment>().HasData(
                 new Apartment
@@ -91,11 +91,11 @@ namespace GolfViewApartments.API.Data
                     MonthlyBB = 4800
                 }
             );
-            
+
             // Seed rooms (Studios: 101-113, 1BR: 201-213, 2BR: 301-313)
             var rooms = new List<Room>();
             int roomId = 1;
-            
+
             // Studio rooms
             for (int i = 1; i <= 13; i++)
             {
@@ -109,7 +109,7 @@ namespace GolfViewApartments.API.Data
                     IsAvailable = true
                 });
             }
-            
+
             // 1 Bedroom rooms
             for (int i = 1; i <= 13; i++)
             {
@@ -123,7 +123,7 @@ namespace GolfViewApartments.API.Data
                     IsAvailable = true
                 });
             }
-            
+
             // 2 Bedroom rooms
             for (int i = 1; i <= 13; i++)
             {
@@ -137,9 +137,9 @@ namespace GolfViewApartments.API.Data
                     IsAvailable = true
                 });
             }
-            
+
             modelBuilder.Entity<Room>().HasData(rooms);
-            
+
             // Seed contact info
             modelBuilder.Entity<ContactInfo>().HasData(
                 new ContactInfo
@@ -157,7 +157,7 @@ namespace GolfViewApartments.API.Data
                     UpdatedAt = DateTime.UtcNow
                 }
             );
-            
+
             // Seed amenity pricing
             modelBuilder.Entity<AmenityPricing>().HasData(
                 new AmenityPricing { Id = 1, Name = "Gym Access", IconClass = "fa-solid fa-dumbbell", Price = 500, UpdatedAt = DateTime.UtcNow },
@@ -177,7 +177,7 @@ namespace GolfViewApartments.API.Data
     );
         }
 
-        
+
 
     }
 }
