@@ -1,0 +1,126 @@
+@using GolfViewApartments.Data
+@using GolfViewApartments.Models
+
+<div class="space-y-8">
+    <!-- Facility Pricing -->
+    <div class="bg-card rounded-xl shadow-elegant overflow-hidden">
+        <div class="bg-primary p-6">
+            <h3 class="font-heading text-xl font-semibold text-primary-foreground">
+                Facility Rates (KES)
+            </h3>
+            <p class="text-sm text-primary-foreground/80 mt-1">
+                Available for all guests • Prices in Kenyan Shillings
+            </p>
+        </div>
+
+        <div class="p-6">
+            <div class="grid gap-4">
+                @foreach (var amenity in ApartmentData.AmenitiesPricing)
+                {
+                    <div class="flex items-center justify-between p-4 bg-secondary rounded-lg">
+                        <div class="flex items-center gap-4">
+                            <div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                @switch (amenity.Id)
+                                {
+                                    case "gym":
+                                    case "gym-pool-combo":
+                                        <!-- Dumbbell Icon -->
+                                        <svg class="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path d="M6.5 6.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0M17.5 6.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0M6.5 17.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0M17.5 17.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0M9 7h6M9 17h6M7 9v6M17 9v6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                                        </svg>
+                                        break;
+                                    case "pool":
+                                        <!-- Waves Icon -->
+                                        <svg class="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                                        </svg>
+                                        break;
+                                    case "steam-bath":
+                                        <!-- Flame Icon -->
+                                        <svg class="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                                        </svg>
+                                        break;
+                                    case "sauna":
+                                        <!-- Sparkles Icon -->
+                                        <svg class="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.937A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.582a.5.5 0 0 1 0 .962L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                                        </svg>
+                                        break;
+                                    default:
+                                        <!-- Default Sparkles Icon -->
+                                        <svg class="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.937A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.582a.5.5 0 0 1 0 .962L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                                        </svg>
+                                        break;
+                                }
+                            </div>
+                            <div>
+                                <p class="font-semibold text-foreground">@amenity.Name</p>
+                                <p class="text-sm text-muted-foreground">@amenity.Description</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            @if (amenity.DailyPrice.HasValue)
+                            {
+                                <p class="text-sm">
+                                    <span class="font-semibold text-foreground">@amenity.DailyPrice.Value.ToString("N0")</span>
+                                    <span class="text-muted-foreground">/day</span>
+                                </p>
+                            }
+                            @if (amenity.MonthlyPrice.HasValue)
+                            {
+                                <p class="text-sm">
+                                    <span class="font-semibold text-foreground">@amenity.MonthlyPrice.Value.ToString("N0")</span>
+                                    <span class="text-muted-foreground">/month</span>
+                                </p>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Conference Packages -->
+    <div class="bg-card rounded-xl shadow-elegant overflow-hidden">
+        <div class="bg-accent p-6">
+            <h3 class="font-heading text-xl font-semibold text-accent-foreground">
+                Conference Packages (KES per person)
+            </h3>
+            <p class="text-sm text-accent-foreground/80 mt-1">
+                Perfect for corporate events and meetings
+            </p>
+        </div>
+
+        <div class="p-6 grid md:grid-cols-2 gap-6">
+            @foreach (var pkg in ApartmentData.ConferencePackages)
+            {
+                <div class="border border-border rounded-lg p-6 hover:shadow-soft transition-shadow">
+                    <div class="flex items-start justify-between mb-4">
+                        <h4 class="font-heading font-semibold text-foreground">@pkg.Name</h4>
+                        <div class="text-right">
+                            <span class="text-2xl font-heading font-bold text-primary">
+                                @pkg.PricePerPerson.ToString("N0")
+                            </span>
+                            <span class="text-sm text-muted-foreground">/person</span>
+                        </div>
+                    </div>
+                    <p class="text-sm text-muted-foreground mb-4">@pkg.Description</p>
+                    <div>
+                        <p class="text-sm font-medium text-foreground mb-2">Includes:</p>
+                        <ul class="grid grid-cols-2 gap-1 text-xs text-muted-foreground">
+                            @foreach (var item in pkg.Includes)
+                            {
+                                <li class="flex items-center gap-1">
+                                    <span class="h-1 w-1 rounded-full bg-primary"></span>
+                                    @item
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

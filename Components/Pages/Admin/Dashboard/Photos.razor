@@ -1,0 +1,260 @@
+@page "/admin/dashboard/photos"
+@using Microsoft.AspNetCore.Components.Forms
+@layout Pages.Admin.Dashboard.Layout
+
+<div class="space-y-6 ">
+    <!-- Header -->
+    <div class="flex flex-wrap items-center gap-4">
+        <!-- LEFT -->
+        <div class="flex-1 min-w-0">
+            <h2 class="text-2xl font-semibold font-heading">Photo Gallery</h2>
+            <p class="text-muted-foreground font-body mt-1 text-sm">
+                Manage property photos • @photos.Count photos
+            </p>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="flex items-center gap-3 ml-auto">
+            <div class="flex items-center gap-1 p-1  rounded-lg">
+                <button
+                    class="px-3 py-1.5 rounded-md transition-colors @(viewMode == ViewMode.Grid ? "bg-white shadow-sm" : "text-muted-foreground")"
+                    @onclick="() => viewMode = ViewMode.Grid">
+                    <i class="fa-solid fa-grid"></i>
+                </button>
+
+                <button
+                    class="px-3 py-1.5 rounded-md transition-colors @(viewMode == ViewMode.List ? "bg-white shadow-sm" : "text-muted-foreground")"
+                    @onclick="() => viewMode = ViewMode.List">
+                    <i class="fa-solid fa-list"></i>
+                </button>
+            </div>
+
+            <button
+                class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i>
+                Add Photo
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Category Pills -->
+    <div class="flex flex-wrap gap-2 font-body">
+        @foreach (var cat in categories)
+        {
+            <button
+                class="@(activeCategory == cat ? "bg-primary text-white" : "border border-gray-200 hover:border-primary hover:bg-accent") px-4 py-1.5 rounded-lg text-sm transition-colors"
+                @onclick="() => activeCategory = cat">
+                @cat
+            </button>
+        }
+    </div>
+
+    <!-- Upload Area -->
+    <InputFile OnChange="HandleFileSelected" accept="image/*" multiple hidden id="fileUpload" />
+    <div class="border-2 border-dashed! border-gray-200 hover:border-accent transition-colors bg-white rounded-xl py-16 cursor-pointer"
+        @onclick="OpenFileDialog">
+        <div class="text-center font-body">
+            <div class="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-cloud-arrow-up text-3xl text-primary"></i>
+            </div>
+            <p class="text-lg font-bold mb-2">Drop photos here</p>
+            <p class="text-sm text-muted-foreground mb-4">
+                or click to browse from your computer
+            </p>
+            <button class="px-4 py-2 border border-gray-200 rounded-lg hover:bg-accent" @onclick:stopPropagation="true"
+                @onclick="OpenFileDialog">
+                Select Files
+            </button>
+            <p class="text-xs text-muted-foreground mt-3">
+                Supports JPG, PNG, WebP • Max 10MB per file
+            </p>
+        </div>
+    </div>
+
+    @if (uploadMessage != null)
+    {
+        <div
+            class="@(uploadSuccess ? "bg-primary font-body border-primary/20 text-white" : "bg-red-50 border-red-200 text-red-800") border rounded-lg p-4">
+            <p class="text-sm font-medium">@uploadMessage</p>
+        </div>
+    }
+
+    <!-- Photos Display -->
+    @if (viewMode == ViewMode.Grid)
+    {
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            @foreach (var photo in FilteredPhotos)
+            {
+                <div
+                    class="overflow-hidden group border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 rounded-xl bg-white">
+                    <div class="relative aspect-[4/3]">
+                        <img src="@photo.Url" alt="@photo.Title"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <p class="text-white font-medium truncate">@photo.Title</p>
+                                <span
+                                    class="mt-2 inline-block px-2 py-0.5 text-xs bg-white/20 text-white border border-white/30 rounded">
+                                    @photo.Category
+                                </span>
+                            </div>
+                        </div>
+                        <div class="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                                class="h-9 w-9 bg-white/90 hover:bg-white shadow-lg rounded-lg flex items-center justify-center"
+                                @onclick="() => ViewPhoto(photo)">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                            <button
+                                class="h-9 w-9 bg-white/90 hover:bg-red-600 hover:text-white shadow-lg rounded-lg flex items-center justify-center transition-colors"
+                                @onclick="() => DeletePhoto(photo.Id)">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="border border-gray-200 rounded-xl bg-white">
+            @foreach (var photo in FilteredPhotos.Select((p, i) => new { Photo = p, Index = i }))
+            {
+                <div
+                    class="@(photo.Index != FilteredPhotos.Count - 1 ? "border-b border-gray-200" : "") flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors group">
+                    <img src="@photo.Photo.Url" alt="@photo.Photo.Title"
+                        class="w-20 h-14 rounded-lg object-cover cursor-pointer" @onclick='() => ViewPhoto(photo.Photo)' />
+                    <div class="flex-1 min-w-0">
+                        <p class="font-medium truncate">@photo.Photo.Title</p>
+                        <p class="text-sm text-muted-foreground">@photo.Photo.Category</p>
+                    </div>
+
+                    <div
+                        class="absolute top-3 right-3 flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                        <button class="h-8 w-8 hover:bg-gray-100 rounded-lg flex items-center justify-center"
+                            @onclick="() => ViewPhoto(photo.Photo)">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button class="h-8 w-8 hover:bg-red-50 hover:text-red-600 rounded-lg flex items-center justify-center"
+                            @onclick="() => DeletePhoto(photo.Photo.Id)">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (FilteredPhotos.Count == 0)
+    {
+        <div class="border border-gray-200 rounded-xl bg-white py-16">
+            <div class="text-center">
+                <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-regular fa-image text-3xl text-gray-400"></i>
+                </div>
+                <p class="text-lg font-bold">No photos @(activeCategory != "All" ? $"in {activeCategory}" : "yet")</p>
+                <p class="text-gray-500 mt-1">
+                    @(activeCategory != "All" ? "Try another category or upload new photos" : "Upload photos to showcase              your property")
+                </p>
+                <button class="mt-4 bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 mx-auto"
+                    @onclick="OpenFileDialog">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    Upload Your First Photo
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private enum ViewMode { Grid, List }
+    private ViewMode viewMode = ViewMode.Grid;
+    private string activeCategory = "All";
+    private string[] categories = { "All", "Studio", "1 Bedroom", "2 Bedroom", "Amenities", "Exterior" };
+    private string? uploadMessage;
+    private bool uploadSuccess;
+
+    private List<Photo> photos = new()
+{
+new() { Id = 1, Url = "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800", Category = "Studio", Title =
+"Studio Apartment Interior" },
+new() { Id = 2, Url = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800", Category = "1 Bedroom", Title =
+"One Bedroom Living Area" },
+new() { Id = 3, Url = "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800", Category = "2 Bedroom",
+Title = "Two Bedroom Suite" }
+};
+
+    private List<Photo> FilteredPhotos => activeCategory == "All"
+    ? photos
+    : photos.Where(p => p.Category == activeCategory).ToList();
+
+    private void OpenFileDialog()
+    {
+        // Trigger file input click via JavaScript interop would be needed in real implementation
+        uploadMessage = "File upload functionality requires JavaScript interop and backend integration";
+        uploadSuccess = false;
+        StateHasChanged();
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            foreach (var file in e.GetMultipleFiles())
+            {
+                if (file.Size > 10 * 1024 * 1024) // 10MB
+                {
+                    uploadMessage = $"File {file.Name} exceeds 10MB limit";
+                    uploadSuccess = false;
+                    continue;
+                }
+
+                // In real implementation, upload to server and get URL
+                var newPhoto = new Photo
+                {
+                    Id = photos.Max(p => p.Id) + 1,
+                    Url = "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
+                    Category = activeCategory == "All" ? "Studio" : activeCategory,
+                    Title = file.Name
+                };
+                photos.Add(newPhoto);
+            }
+
+            uploadMessage = $"Successfully uploaded {e.FileCount} photo(s)";
+            uploadSuccess = true;
+        }
+        catch (Exception ex)
+        {
+            uploadMessage = $"Error uploading files: {ex.Message}";
+            uploadSuccess = false;
+        }
+    }
+
+    private void ViewPhoto(Photo photo)
+    {
+        uploadMessage = $"Viewing: {photo.Title}";
+        uploadSuccess = true;
+    }
+
+    private void DeletePhoto(int id)
+    {
+        var photo = photos.FirstOrDefault(p => p.Id == id);
+        if (photo != null)
+        {
+            photos.Remove(photo);
+            uploadMessage = "Photo deleted successfully";
+            uploadSuccess = true;
+        }
+    }
+
+    private class Photo
+    {
+        public int Id { get; set; }
+        public string Url { get; set; } = "";
+        public string Category { get; set; } = "";
+        public string Title { get; set; } = "";
+    }
+}

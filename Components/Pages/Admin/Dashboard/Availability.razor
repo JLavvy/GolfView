@@ -1,0 +1,265 @@
+@page "/admin/dashboard/availability"
+@layout Pages.Admin.Dashboard.Layout
+
+<div class="space-y-6 ">
+    <!-- Header -->
+    <div class="flex flex-wrap items-center gap-4">
+        <div class="flex-1 min-w-0">
+            <h2 class="text-2xl font-bold font-heading">Availability</h2>
+            <p class="text-muted-foreground font-body mt-1">
+                Click on a room to toggle availability status
+            </p>
+        </div>
+        <div class="flex items-center gap-3 ml-auto">
+            <div class="flex items-center gap-1 p-1 font-body rounded-lg">
+                <button
+                    class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg shadow-lg shadow-blue-600/25 flex items-center gap-2"
+                    @onclick="SaveChanges" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                    }
+                    else
+                    {
+                        <i class="fa-solid fa-floppy-disk"></i>
+                    }
+                    @(isSaving ? "Saving..." : "Save Changes")
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @if (saveMessage != null)
+    {
+        <div class="bg-primary/20 border text-black rounded-lg p-4 font-body">
+            <p class="text-sm font-body font-medium">@saveMessage</p>
+        </div>
+    }
+
+    <!-- Summary Cards -->
+    <div class="grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 bg-white">
+        <div class="border border-gray-200 rounded-xl p-5">
+            <div class="flex items-center gap-4">
+                <div class="p-3 rounded-xl bg-primary/10">
+                    <i class="fa-solid fa-circle-check text-xl text-primary"></i>
+                </div>
+                <div>
+                    <p class="text-3xl font-heading text-primary">@GetAvailableCount()</p>
+                    <p class="text-sm font-body text-muted-foreground">Available Rooms</p>
+                </div>
+            </div>
+        </div>
+        <div class="border border-gray-200 rounded-xl p-5">
+            <div class="flex items-center gap-4">
+                <div class="p-3 rounded-xl bg-accent/20">
+                    <i class="fa-solid fa-circle-xmark text-xl text-accent"></i>
+                </div>
+                <div>
+                    <p class="text-3xl font-heading text-accent">@GetOccupiedCount()</p>
+                    <p class="text-sm font-body text-muted-foreground">Occupied Rooms</p>
+                </div>
+            </div>
+        </div>
+        <div class="border border-gray-200 rounded-xl p-5">
+            <div class="flex items-center gap-4">
+                <div class="p-3 rounded-xl bg-primary/10">
+                    <i class="fa-solid fa-building text-xl text-primary"></i>
+                </div>
+                <div>
+                    <p class="text-3xl font-heading text-black">@GetTotalCount()</p>
+                    <p class="text-sm font-body text-muted-foreground">Total Rooms</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Occupancy Bar -->
+    <div class="border border-gray-200 rounded-xl bg-white p-5">
+        <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-body font-medium">Occupancy Rate</span>
+            <span class="text-lg font-heading">@GetOccupancyRate()%</span>
+        </div>
+        <div class="h-3 bg-card rounded-full border border-gray-200 overflow-hidden">
+            <div class="h-full bg-primary rounded-full transition-all duration-500" style="width: @GetOccupancyRate()%">
+            </div>
+        </div>
+        <div class="flex justify-between mt-2 text-xs text-muted-foreground font-heading">
+            <span>@GetOccupiedCount() occupied</span>
+            <span>@GetAvailableCount() available</span>
+        </div>
+    </div>
+
+    <!-- Studio Apartments -->
+    @RenderRoomTypeCard("Studio", "fa-solid fa-house", GetRoomsByType("Studio"))
+
+    <!-- 1 Bedroom Apartments -->
+    @RenderRoomTypeCard("1 Bedroom", "fa-solid fa-house", GetRoomsByType("1 Bedroom"))
+
+    <!-- 2 Bedroom Apartments -->
+    @RenderRoomTypeCard("2 Bedroom", "fa-solid fa-house", GetRoomsByType("2 Bedroom"))
+    <!-- Legend -->
+    <div class="flex flex-wrap items-center gap-6 text-sm p-4 bg-white rounded-xl border border-gray-200 font-body">
+        <span class="text-muted-foreground font-body">Legend:</span>
+        <div class="flex items-center gap-2 ">
+            <div
+                class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-medium shadow-md shadow-primary/25">
+                101
+            </div>
+            <span>Available</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <div
+                class="w-8 h-8 rounded-lg bg-accent border border-gray200 flex items-center justify-center text-white text-xs font-medium">
+                102
+            </div>
+            <span>Occupied</span>
+        </div>
+        <div class="flex items-center gap-2 ml-auto text-gray-500">
+            <i class="fa-solid fa-users"></i>
+            <span>Click to toggle status</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool isSaving = false;
+    private string? saveMessage;
+
+    private List<Room> rooms = new();
+
+    protected override void OnInitialized()
+    {
+        GenerateRooms();
+    }
+
+    private void GenerateRooms()
+    {
+        var random = new Random(42); // Fixed seed for consistent results
+        rooms = new List<Room>();
+
+        // Studio rooms (101-113)
+        for (int i = 1; i <= 13; i++)
+        {
+            rooms.Add(new Room
+            {
+                Number = $"10{i}",
+                Type = "Studio",
+                Available = random.NextDouble() > 0.4
+            });
+        }
+
+        // 1 Bedroom rooms (201-213)
+        for (int i = 1; i <= 13; i++)
+        {
+            rooms.Add(new Room
+            {
+                Number = $"20{i}",
+                Type = "1 Bedroom",
+                Available = random.NextDouble() > 0.4
+            });
+        }
+
+        // 2 Bedroom rooms (301-313)
+        for (int i = 1; i <= 13; i++)
+        {
+            rooms.Add(new Room
+            {
+                Number = $"30{i}",
+                Type = "2 Bedroom",
+                Available = random.NextDouble() > 0.4
+            });
+        }
+    }
+
+    private List<Room> GetRoomsByType(string type) => rooms.Where(r => r.Type == type).ToList();
+
+    private int GetAvailableCount() => rooms.Count(r => r.Available);
+
+    private int GetOccupiedCount() => rooms.Count(r => !r.Available);
+
+    private int GetTotalCount() => rooms.Count;
+
+    private int GetOccupancyRate()
+    {
+        if (rooms.Count == 0) return 0;
+        return (int)Math.Round((double)GetOccupiedCount() / rooms.Count * 100);
+    }
+
+    private void ToggleRoom(Room room)
+    {
+        room.Available = !room.Available;
+        StateHasChanged();
+    }
+
+    private async Task SaveChanges()
+    {
+        isSaving = true;
+        saveMessage = null;
+        StateHasChanged();
+
+        await Task.Delay(500); // Simulate API call
+
+        isSaving = false;
+        saveMessage = "Room availability updated!";
+        StateHasChanged();
+
+        await Task.Delay(3000);
+        saveMessage = null;
+        StateHasChanged();
+    }
+
+    private RenderFragment RenderRoomTypeCard(string type, string icon, List<Room> typeRooms) => __builder =>
+    {
+        var availableCount = typeRooms.Count(r => r.Available);
+        var occupiedCount = typeRooms.Count - availableCount;
+
+        <div class="border border-gray-200 rounded-xl bg-white">
+            <div class="p-4 pb-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="@icon text-2xl "></i>
+                        <h3 class="text-lg font-medium font-body">@type</h3>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 text-xs border border-gray-200 bg-primary text-white rounded">
+                            @availableCount available
+                        </span>
+                        <span class="px-2 py-0.5 text-xs border border-gray-200 bg-accent text-white rounded">
+                            @occupiedCount occupied
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4">
+                <div class="flex flex-wrap gap-3">
+                    @foreach (var room in typeRooms)
+                    {
+                        <button class="@GetRoomClasses(room.Available)" @onclick="() => ToggleRoom(room)">
+                            @room.Number
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    };
+
+    private string GetRoomClasses(bool available)
+    {
+        var baseClasses =
+        "relative px-8 py-3 rounded-xl text-sm font-medium " +
+        "transition-all duration-200 hover:scale-105";
+
+        return available
+        ? $"{baseClasses} bg-primary text-white shadow-md shadow-primary/30"
+        : $"{baseClasses} bg-accent text-white border border-accent/70";
+    }
+
+
+    private class Room
+    {
+        public string Number { get; set; } = "";
+        public string Type { get; set; } = "";
+        public bool Available { get; set; }
+    }
+}

@@ -6,21 +6,18 @@ obj/
 
 # SQLite
 *.db
-*.sqlite
 *.db-shm
 *.db-wal
 
-# Blazor
-wwwroot/service-worker-assets.js
-
-# Node / Android
+# Node / frontend
 node_modules/
-.gradle/
 
-# IDE
+# Secrets
+.env
+appsettings.Development.json
+
+# IDEs / OS
 .vscode/
 .idea/
-
-# OS
-Thumbs.db
 .DS_Store
+Thumbs.db

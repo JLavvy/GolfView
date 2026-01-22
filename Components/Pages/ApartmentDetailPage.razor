@@ -1,0 +1,262 @@
+@page "/apartments/{Id}"
+@using GolfViewApartments.Data
+@using GolfViewApartments.Models
+
+@if (apartment == null)
+{
+    <div class="min-h-screen flex items-center justify-center">
+        <div class="text-center ">
+            <h1 class="text-2xl font-heading font-bold text-foreground mb-4">
+                Apartment Not Found
+            </h1>
+            <a href="/apartments" class="inline-flex items-center justify-center bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-lg transition-colors">
+                View All Apartments
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Breadcrumb -->
+    <div class="py-4">
+        <div class="relative w-full container mx-auto px-4 sm:px-2 md:px-14 lg:px-18 xl:px-[88px] max-w-[1440px]">
+            <a href="/apartments" class="inline-flex font-heading items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+                <i class="fas fa-arrow-left"></i>
+                Back to Apartments
+            </a>
+        </div>
+    </div>
+
+    <!-- Hero Image -->
+    <section class="relative h-[50vh] min-h-[400px]">
+        <img src="@apartment.Image"
+             alt="@apartment.Name"
+             class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-b from-white via-white/50 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 right-0 p-8">
+            <div class="relative w-full container mx-auto font-body px-4 sm:px-2 md:px-14 lg:px-18 xl:px-[88px] max-w-[1440px]">
+                <span class="inline-block bg-primary px-3 py-1 rounded-full text-xs font-medium mb-3">
+                    @apartment.Type.Replace("-", " ").ToUpper() • @apartment.Units Units
+                </span>
+                <h1 class="text-4xl md:text-5xl font-heading font-bold text-black mb-2">
+                    @apartment.Name
+                </h1>
+                <p class="text-lg text-muted-foreground">@apartment.Description</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Details -->
+    <section class="py-16">
+        <div class="relative w-full container mx-auto px-4 sm:px-2 md:px-14 lg:px-18 xl:px-[88px] max-w-[1440px]">
+            <div class="grid lg:grid-cols-3 gap-12">
+                <!-- Main Content -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- Quick Stats -->
+                    <div class="flex flex-wrap gap-6 p-6 bg-secondary rounded-xl">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-users text-primary"></i>
+                            <span>Max @apartment.MaxGuests Guests</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-expand text-primary"></i>
+                            <span>@apartment.Size</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-bed text-primary"></i>
+                            <span>@apartment.BedSize Bed</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-bath text-primary"></i>
+                            <span>@apartment.Bathrooms Bathroom@(apartment.Bathrooms > 1 ? "s" : "")</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-home text-primary"></i>
+                            <span>@apartment.Units Units Available</span>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <h2 class="text-2xl font-heading font-bold text-black mb-4">
+                            About This Apartment
+                        </h2>
+                        <p class="text-muted-foreground font-body leading-relaxed">
+                            @apartment.LongDescription
+                        </p>
+                    </div>
+
+                    <!-- Amenities -->
+                    <div>
+                        <h2 class="text-2xl font-heading font-bold text-black mb-4">
+                            Amenities
+                        </h2>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 font-body">
+                            @foreach (var amenity in apartment.Amenities)
+                            {
+                                <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <i class="fas fa-check text-primary"></i>
+                                    @amenity
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Features -->
+                    <div>
+                        <h2 class="text-2xl font-heading font-bold text-black mb-4">
+                            Features & Services
+                        </h2>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 font-body">
+                            @foreach (var feature in apartment.Features)
+                            {
+                                <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <i class="fas fa-check text-accent"></i>
+                                    @feature
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Pricing Table -->
+                    <div>
+                        <h2 class="text-2xl font-heading font-bold text-black mb-4">
+                            Pricing (KES)
+                        </h2>
+                        <div class="rounded-xl overflow-hidden">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="bg-primary/10 font-body">
+                                        <th class="text-left p-4 font-medium text-black">Plan</th>
+                                        <th class="text-center p-4 font-medium text-black">Daily</th>
+                                        <th class="text-center p-4 font-medium text-black">Monthly</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-border font-body">
+                                    <tr>
+                                        <td class="p-4 text-muted-foreground">Bed Only</td>
+                                        <td class="p-4 text-center font-semibold text-muted-foreground">
+                                            @apartment.Pricing.DailyBedOnly.ToString("N0")
+                                        </td>
+                                        <td class="p-4 text-center font-semibold text-muted-foreground">
+                                            @apartment.Pricing.MonthlyBedOnly.ToString("N0")
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-4 text-muted-foreground">Bed & Breakfast</td>
+                                        <td class="p-4 text-center font-semibold text-muted-foreground">
+                                            @apartment.Pricing.DailyBB.ToString("N0")
+                                        </td>
+                                        <td class="p-4 text-center font-semibold text-muted-foreground">
+                                            @apartment.Pricing.MonthlyBB.ToString("N0")
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Rental Options -->
+                    <div>
+                        <h2 class="text-2xl font-heading font-bold text-black mb-4">
+                            Rental Options
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @foreach (var rentalType in ApartmentData.RentalTypes)
+                            {
+                                <div class="bg-secondary rounded-lg p-4 flex items-start gap-4">
+                                    <div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-calendar text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-black font-heading">@rentalType.Value.Label</h4>
+                                        <p class="text-sm text-muted-foreground font-body">@rentalType.Value.Description</p>
+                                        <p class="text-lg font-semibold text-primary font-bodymt-2">
+                                            @if (rentalType.Key == "daily")
+                                            {
+                                                <text>KES @apartment.Pricing.DailyBedOnly.ToString("N0")/night</text>
+                                            }
+                                            else
+                                            {
+                                                <text>KES @apartment.Pricing.MonthlyBedOnly.ToString("N0")/month</text>
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Sidebar -->
+                <div>
+                    <div class="bg-card rounded-xl p-6 shadow-elegant sticky top-24">
+                        <div class="text-center mb-6">
+                            <div class="space-y-2 font-body">
+                                <div>
+                                    <span class="text-3xl font-bold text-black">
+                                        KES @apartment.Pricing.DailyBedOnly.ToString("N0")
+                                    </span>
+                                    <span class="text-muted-foreground font-body">/night</span>
+                                </div>
+                                <div class="text-sm text-muted-foreground">
+                                    or <span class="font-semibold text-black">KES @apartment.Pricing.MonthlyBedOnly.ToString("N0")</span>/month
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="/booking" class="block w-full bg-accent hover:bg-accent/90 text-white font-semibold px-6 py-4 rounded-lg transition-colors text-center font-body mb-4">
+                            Book Now
+                        </a>
+
+                        <a href="/contact" class="block w-full border border-border hover:bg-primary hover:text-white text-primary font-semibold px-6 py-3 rounded-lg transition-colors font-body text-center">
+                            Inquire
+                        </a>
+
+                        <div class="mt-6 pt-6 border-t border-border">
+                            <h4 class="font-medium text-black font-heading mb-3">Quick Info:</h4>
+                            <ul class="space-y-2 text-sm text-muted-foreground font-body">
+                                <li>Bed Size: @apartment.BedSize</li>
+                                <li>Floor Area: @apartment.Size</li>
+                                <li>Max Guests: @apartment.MaxGuests</li>
+                                <li>Check-in: 3:00 PM</li>
+                                <li>Check-out: 11:00 AM</li>
+                                <li>Units available: @apartment.Units</li>
+                            </ul>
+                        </div>
+
+                        <div class="mt-6 pt-6 border-t border-border">
+                            <h4 class="font-medium text-black font-heading mb-3">Meal Options:</h4>
+                            <ul class="space-y-2 text-sm">
+                                @foreach (var mealPlan in ApartmentData.MealPlans)
+                                {
+                                    <li class="flex justify-between font-body">
+                                        <span class="text-muted-foreground">@mealPlan.Value.Label</span>
+                                        <span class="text-black font-medium">
+                                            @mealPlan.Value.ShortLabel
+                                        </span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter]
+    public string? Id { get; set; }
+
+    private Apartment? apartment;
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(Id))
+        {
+            apartment = ApartmentData.GetApartmentById(Id);
+        }
+    }
+}
