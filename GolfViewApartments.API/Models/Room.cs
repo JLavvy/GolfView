@@ -1,11 +1,10 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GolfViewApartments.API.Models
 {
     public class Room
     {
-       [Key]
+        [Key]
         public int Id { get; set; }
 
         [Required]
@@ -15,10 +14,11 @@ namespace GolfViewApartments.API.Models
         public int ApartmentId { get; set; }
 
         [Required]
-        [StringLength(50)]
+        [StringLength(100)]
         public string Type { get; set; } = string.Empty;
 
         public int Floor { get; set; }
+
         public bool IsAvailable { get; set; } = true;
 
         // Navigation property

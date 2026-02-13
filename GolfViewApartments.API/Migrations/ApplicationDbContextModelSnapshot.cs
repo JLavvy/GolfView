@@ -15,7 +15,7 @@ namespace GolfViewApartments.API.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
 
             modelBuilder.Entity("GolfViewApartments.API.Models.Admin", b =>
                 {
@@ -38,15 +38,6 @@ namespace GolfViewApartments.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Admins");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Email = "admin@golfview.com",
-                            PasswordHash = "$2a$11$gwS9mpKsNk4fer0hhCA1rOJSduO/t0Ea.63UwKStig93jXEoIVuFW",
-                            Role = "Admin"
-                        });
                 });
 
             modelBuilder.Entity("GolfViewApartments.API.Models.AmenityPricing", b =>
@@ -82,7 +73,7 @@ namespace GolfViewApartments.API.Migrations
                             IconClass = "fa-solid fa-dumbbell",
                             Name = "Gym Access",
                             Price = 500m,
-                            UpdatedAt = new DateTime(2026, 1, 21, 14, 21, 59, 868, DateTimeKind.Utc).AddTicks(5685)
+                            UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -90,7 +81,7 @@ namespace GolfViewApartments.API.Migrations
                             IconClass = "fa-solid fa-person-swimming",
                             Name = "Pool Access",
                             Price = 500m,
-                            UpdatedAt = new DateTime(2026, 1, 21, 14, 21, 59, 868, DateTimeKind.Utc).AddTicks(5688)
+                            UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -98,7 +89,7 @@ namespace GolfViewApartments.API.Migrations
                             IconClass = "fa-solid fa-hot-tub-person",
                             Name = "Steam Bath",
                             Price = 1000m,
-                            UpdatedAt = new DateTime(2026, 1, 21, 14, 21, 59, 868, DateTimeKind.Utc).AddTicks(5690)
+                            UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
                         new
                         {
@@ -106,7 +97,7 @@ namespace GolfViewApartments.API.Migrations
                             IconClass = "fa-solid fa-fire",
                             Name = "Sauna",
                             Price = 1000m,
-                            UpdatedAt = new DateTime(2026, 1, 21, 14, 21, 59, 868, DateTimeKind.Utc).AddTicks(5691)
+                            UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         });
                 });
 
@@ -215,6 +206,16 @@ namespace GolfViewApartments.API.Migrations
                     b.Property<int>("ApartmentId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("BoardType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BookingReference")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CheckIn")
                         .HasColumnType("TEXT");
 
@@ -225,7 +226,7 @@ namespace GolfViewApartments.API.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ChildrenAges")
-                        .IsRequired()
+                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
@@ -234,38 +235,117 @@ namespace GolfViewApartments.API.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("MealPlan")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RentalType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RoomNumber")
+                    b.Property<string>("Occupancy")
                         .IsRequired()
                         .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Room")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RoomType")
+                        .IsRequired()
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SpecialRequests")
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
 
                     b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ApartmentId");
+                    b.HasIndex("BookingReference")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Bookings_BookingReference");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_Bookings_CreatedAt");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("IX_Bookings_CustomerId");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Bookings_Status");
+
+                    b.HasIndex("ApartmentId", "CheckIn", "CheckOut")
+                        .HasDatabaseName("IX_Bookings_Apartment_Dates");
+
+                    b.HasIndex("Room", "CheckIn", "CheckOut")
+                        .HasDatabaseName("IX_Bookings_Room_Dates");
+
+                    b.HasIndex("RoomType", "CheckIn", "CheckOut")
+                        .HasDatabaseName("IX_Bookings_RoomType_Dates");
 
                     b.ToTable("Bookings");
+                });
+
+            modelBuilder.Entity("GolfViewApartments.API.Models.ConferencePackage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IconClass")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ConferencePackages");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IconClass = "fa-solid fa-sun",
+                            Name = "Full Day Package",
+                            Price = 2500m
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IconClass = "fa-solid fa-cloud-sun",
+                            Name = "Half Day Package",
+                            Price = 1500m
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IconClass = "fa-solid fa-bed-pulse",
+                            Name = "Residential Package",
+                            Price = 8000m
+                        });
                 });
 
             modelBuilder.Entity("GolfViewApartments.API.Models.ContactInfo", b =>
@@ -337,7 +417,7 @@ namespace GolfViewApartments.API.Migrations
                             InstagramUrl = "",
                             Phone = "+254 700 000 000",
                             TwitterUrl = "",
-                            UpdatedAt = new DateTime(2026, 1, 21, 14, 21, 59, 868, DateTimeKind.Utc).AddTicks(5621),
+                            UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Website = "https://golfviewapartments.co.ke",
                             WhatsApp = "+254 700 000 000"
                         });
@@ -415,7 +495,81 @@ namespace GolfViewApartments.API.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.ToTable("Customers");
+                });
+
+            modelBuilder.Entity("GolfViewApartments.API.Models.FitnessAmenity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("DayRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("IconClass")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("MonthlyRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FitnessAmenities");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayRate = 500m,
+                            IconClass = "fa-solid fa-dumbbell",
+                            MonthlyRate = 5000m,
+                            Name = "Gym"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayRate = 500m,
+                            IconClass = "fa-solid fa-person-swimming",
+                            MonthlyRate = 5000m,
+                            Name = "Swimming Pool"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayRate = 1000m,
+                            IconClass = "fa-solid fa-water",
+                            MonthlyRate = 0m,
+                            Name = "Steam Bath"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            DayRate = 1000m,
+                            IconClass = "fa-solid fa-hot-tub-person",
+                            MonthlyRate = 0m,
+                            Name = "Sauna"
+                        });
                 });
 
             modelBuilder.Entity("GolfViewApartments.API.Models.Photo", b =>
@@ -477,7 +631,7 @@ namespace GolfViewApartments.API.Migrations
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasMaxLength(50)
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -840,6 +994,206 @@ namespace GolfViewApartments.API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("GolfViewApartments.API.Models.RoomRate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("BoardType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("FirstOccupancy")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("RoomTypeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("SecondOccupancy")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoomTypeId");
+
+                    b.ToTable("RoomRates");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            BoardType = "Bed Only",
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstOccupancy = 5000m,
+                            RoomTypeId = 1,
+                            SecondOccupancy = 7000m
+                        },
+                        new
+                        {
+                            Id = 2,
+                            BoardType = "Bed and Breakfast",
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstOccupancy = 5500m,
+                            RoomTypeId = 1,
+                            SecondOccupancy = 7500m
+                        },
+                        new
+                        {
+                            Id = 3,
+                            BoardType = "Half Board",
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstOccupancy = 6000m,
+                            RoomTypeId = 1,
+                            SecondOccupancy = 8000m
+                        },
+                        new
+                        {
+                            Id = 4,
+                            BoardType = "Full Board",
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstOccupancy = 6500m,
+                            RoomTypeId = 1,
+                            SecondOccupancy = 8500m
+                        },
+                        new
+                        {
+                            Id = 5,
+                            BoardType = "Bed Only",
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstOccupancy = 6000m,
+                            RoomTypeId = 2,
+                            SecondOccupancy = 8000m
+                        },
+                        new
+                        {
+                            Id = 6,
+                            BoardType = "Bed and Breakfast",
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstOccupancy = 6500m,
+                            RoomTypeId = 2,
+                            SecondOccupancy = 8500m
+                        },
+                        new
+                        {
+                            Id = 7,
+                            BoardType = "Half Board",
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstOccupancy = 7000m,
+                            RoomTypeId = 2,
+                            SecondOccupancy = 9000m
+                        },
+                        new
+                        {
+                            Id = 8,
+                            BoardType = "Full Board",
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstOccupancy = 7500m,
+                            RoomTypeId = 2,
+                            SecondOccupancy = 9500m
+                        },
+                        new
+                        {
+                            Id = 9,
+                            BoardType = "Bed Only",
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstOccupancy = 8000m,
+                            RoomTypeId = 3,
+                            SecondOccupancy = 10000m
+                        },
+                        new
+                        {
+                            Id = 10,
+                            BoardType = "Bed and Breakfast",
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstOccupancy = 8500m,
+                            RoomTypeId = 3,
+                            SecondOccupancy = 10500m
+                        },
+                        new
+                        {
+                            Id = 11,
+                            BoardType = "Half Board",
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstOccupancy = 9000m,
+                            RoomTypeId = 3,
+                            SecondOccupancy = 11000m
+                        },
+                        new
+                        {
+                            Id = 12,
+                            BoardType = "Full Board",
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            FirstOccupancy = 9500m,
+                            RoomTypeId = 3,
+                            SecondOccupancy = 11500m
+                        });
+                });
+
+            modelBuilder.Entity("GolfViewApartments.API.Models.RoomType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IconClass")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MaxOccupancy")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RoomTypeEnum")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RoomTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IconClass = "fa-solid fa-bed",
+                            MaxOccupancy = 2,
+                            Name = "Studio",
+                            RoomTypeEnum = "Studio"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IconClass = "fa-solid fa-door-open",
+                            MaxOccupancy = 2,
+                            Name = "One Bedroom",
+                            RoomTypeEnum = "OneBedroom"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            IconClass = "fa-solid fa-house",
+                            MaxOccupancy = 4,
+                            Name = "Two Bedroom",
+                            RoomTypeEnum = "TwoBedroom"
+                        });
+                });
+
             modelBuilder.Entity("GolfViewApartments.API.Models.Booking", b =>
                 {
                     b.HasOne("GolfViewApartments.API.Models.Apartment", "Apartment")
@@ -870,6 +1224,17 @@ namespace GolfViewApartments.API.Migrations
                     b.Navigation("Apartment");
                 });
 
+            modelBuilder.Entity("GolfViewApartments.API.Models.RoomRate", b =>
+                {
+                    b.HasOne("GolfViewApartments.API.Models.RoomType", "RoomType")
+                        .WithMany("Rates")
+                        .HasForeignKey("RoomTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RoomType");
+                });
+
             modelBuilder.Entity("GolfViewApartments.API.Models.Apartment", b =>
                 {
                     b.Navigation("Bookings");
@@ -880,6 +1245,11 @@ namespace GolfViewApartments.API.Migrations
             modelBuilder.Entity("GolfViewApartments.API.Models.Customer", b =>
                 {
                     b.Navigation("Bookings");
+                });
+
+            modelBuilder.Entity("GolfViewApartments.API.Models.RoomType", b =>
+                {
+                    b.Navigation("Rates");
                 });
 #pragma warning restore 612, 618
         }

@@ -5,31 +5,50 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GolfViewApartments.API.Repositories.Implementations
 {
-    public class CustomerRepository : GenericRepository<Customer>, ICustomerRepository
+    public class CustomerRepository : ICustomerRepository
     {
-        public CustomerRepository(ApplicationDbContext context) : base(context)
+        private readonly ApplicationDbContext _context;
+
+        public CustomerRepository(ApplicationDbContext context)
         {
+            _context = context;
+        }
+
+        public async Task<Customer?> GetByIdAsync(int id)
+        {
+            return await _context.Customers
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<Customer?> GetByEmailAsync(string email)
         {
-            return await _dbSet
-                .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.Email.ToLower() == email.ToLower());
+            return await _context.Customers
+                .FirstOrDefaultAsync(c => c.Email == email);
         }
 
-        public async Task<Customer?> GetByPhoneAsync(string phone)
+        public async Task<List<Customer>> GetAllAsync()
         {
-            return await _dbSet
-                .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.Phone == phone);
+            return await _context.Customers
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
         }
 
-        public async Task<bool> EmailExistsAsync(string email)
+        public async Task AddAsync(Customer customer)
         {
-            return await _dbSet
-                .AsNoTracking()
-                .AnyAsync(c => c.Email.ToLower() == email.ToLower());
+            await _context.Customers.AddAsync(customer);
+            await _context.SaveChangesAsync();
+        }
+
+        public void Update(Customer customer)
+        {
+            _context.Customers.Update(customer);
+            _context.SaveChanges();
+        }
+
+        public void Delete(Customer customer)
+        {
+            _context.Customers.Remove(customer);
+            _context.SaveChanges();
         }
     }
 }

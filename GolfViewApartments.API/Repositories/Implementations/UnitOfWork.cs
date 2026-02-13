@@ -1,5 +1,6 @@
 using GolfViewApartments.API.Data;
 using GolfViewApartments.API.Repositories.Interfaces;
+using GolfViewApartments.API.Repositories.Implementations; // ADD THIS LINE
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace GolfViewApartments.API.Repositories.Implementations
