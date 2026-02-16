@@ -109,6 +109,8 @@ builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IPricingService, PricingService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
 
 
 // BUILD THE APP FIRST

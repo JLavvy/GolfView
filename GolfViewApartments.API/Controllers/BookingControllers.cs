@@ -17,13 +17,16 @@ namespace GolfViewApartments.API.Controllers
     public class BookingsController : ControllerBase
     {
         private readonly IBookingService _bookingService;
+        private readonly IEmailService _emailService;  // ADDED: Email service
         private readonly ILogger<BookingsController> _logger;
 
         public BookingsController(
             IBookingService bookingService,
+            IEmailService emailService,  // ADDED: Email service injection
             ILogger<BookingsController> logger)
         {
             _bookingService = bookingService;
+            _emailService = emailService;  // ADDED: Store email service
             _logger = logger;
         }
 
@@ -47,12 +50,69 @@ namespace GolfViewApartments.API.Controllers
 
                 var booking = await _bookingService.CreateBookingAsync(request);
 
+                // ADDED: Send confirmation email
+                bool emailSent = false;
+                if (request.SendConfirmationEmail)
+                {
+                    try
+                    {
+                        var emailData = new BookingConfirmationEmail
+                        {
+                            BookingReference = booking.BookingReference,
+                            GuestName = booking.Customer,
+                            GuestEmail = booking.Email,
+                            GuestPhone = booking.Phone,
+                            RoomNumber = booking.Room,
+                            RoomType = booking.RoomType,
+                            BoardType = booking.BoardType,
+                            Occupancy = booking.Occupancy,
+                            CheckInDate = booking.CheckIn.ToString("dddd, MMMM dd, yyyy"),
+                            CheckOutDate = booking.CheckOut.ToString("dddd, MMMM dd, yyyy"),
+                            TotalNights = booking.TotalNights,
+                            Adults = booking.Adults,
+                            Children = booking.Children,
+                            ChildrenAges = booking.ChildrenAges,
+                            TotalPrice = booking.TotalPrice,
+                            PricePerNight = booking.PricePerNight,
+                            SpecialRequests = booking.SpecialRequests
+                        };
+
+                        emailSent = await _emailService.SendBookingConfirmationAsync(emailData);
+
+                        if (!emailSent)
+                        {
+                            _logger.LogWarning(
+                                "Failed to send confirmation email for booking {BookingReference} to {Email}",
+                                booking.BookingReference,
+                                booking.Email);
+                        }
+                        else
+                        {
+                            _logger.LogInformation(
+                                "Confirmation email sent successfully for booking {BookingReference} to {Email}",
+                                booking.BookingReference,
+                                booking.Email);
+                        }
+                    }
+                    catch (Exception emailEx)
+                    {
+                        // Log the error but don't fail the booking
+                        _logger.LogError(emailEx,
+                            "Error sending confirmation email for booking {BookingReference}",
+                            booking.BookingReference);
+                    }
+                }
+
+                var successMessage = emailSent
+                    ? $"Booking created successfully. Reference: {booking.BookingReference}. Confirmation email sent to {booking.Email}"
+                    : $"Booking created successfully. Reference: {booking.BookingReference}";
+
                 return CreatedAtAction(
                     nameof(GetBooking),
                     new { id = booking.Id },
                     ApiResponse<BookingResponseDto>.SuccessResponse(
                         booking,
-                        $"Booking created successfully. Reference: {booking.BookingReference}"));
+                        successMessage));
             }
             catch (ArgumentException ex)
             {
@@ -227,6 +287,75 @@ namespace GolfViewApartments.API.Controllers
                 _logger.LogError(ex, "Error retrieving available rooms for type {Type}", type);
                 return StatusCode(500, ApiResponse<List<RoomAvailabilityDto>>.FailureResponse(
                     "An error occurred while retrieving available rooms"));
+            }
+        }
+
+        /// <summary>
+        /// ADDED: Resend booking confirmation email
+        /// </summary>
+        [HttpPost("{id:int}/resend-confirmation")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ApiResponse>> ResendConfirmationEmail(int id)
+        {
+            try
+            {
+                var booking = await _bookingService.GetBookingByIdAsync(id);
+
+                var emailData = new BookingConfirmationEmail
+                {
+                    BookingReference = booking.BookingReference,
+                    GuestName = booking.Customer,
+                    GuestEmail = booking.Email,
+                    GuestPhone = booking.Phone,
+                    RoomNumber = booking.Room,
+                    RoomType = booking.RoomType,
+                    BoardType = booking.BoardType,
+                    Occupancy = booking.Occupancy,
+                    CheckInDate = booking.CheckIn.ToString("dddd, MMMM dd, yyyy"),
+                    CheckOutDate = booking.CheckOut.ToString("dddd, MMMM dd, yyyy"),
+                    TotalNights = booking.TotalNights,
+                    Adults = booking.Adults,
+                    Children = booking.Children,
+                    ChildrenAges = booking.ChildrenAges,
+                    TotalPrice = booking.TotalPrice,
+                    PricePerNight = booking.PricePerNight,
+                    SpecialRequests = booking.SpecialRequests
+                };
+
+                var emailSent = await _emailService.SendBookingConfirmationAsync(emailData);
+
+                if (emailSent)
+                {
+                    _logger.LogInformation(
+                        "Confirmation email resent successfully for booking {BookingReference} to {Email}",
+                        booking.BookingReference,
+                        booking.Email);
+
+                    return Ok(ApiResponse.SuccessResponse(
+                        $"Confirmation email resent successfully to {booking.Email}"));
+                }
+                else
+                {
+                    _logger.LogWarning(
+                        "Failed to resend confirmation email for booking {BookingReference}",
+                        booking.BookingReference);
+
+                    return StatusCode(500, ApiResponse.FailureResponse(
+                        "Failed to send confirmation email. Please check email configuration."));
+                }
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse.FailureResponse(
+                    "Booking not found", ex.Message));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error resending confirmation email for booking {BookingId}", id);
+                return StatusCode(500, ApiResponse.FailureResponse(
+                    "An error occurred while resending the confirmation email"));
             }
         }
     }

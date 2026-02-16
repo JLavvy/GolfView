@@ -100,6 +100,15 @@ namespace GolfViewApartments.API.DTOs
         [StringLength(1000, ErrorMessage = "Special requests cannot exceed 1000 characters")]
         public string? SpecialRequests { get; set; }
 
+        // ===== EMAIL CONFIRMATION =====
+        // ⭐ ADD THIS SECTION - THIS IS THE ONLY NEW CODE ⭐
+        /// <summary>
+        /// Flag to indicate whether to send confirmation email to the guest
+        /// Default is true - confirmation email will be sent automatically
+        /// Set to false if you want to suppress email (e.g., for admin test bookings)
+        /// </summary>
+        public bool SendConfirmationEmail { get; set; } = true;
+
         // ===== COMPUTED PROPERTY =====
         public int TotalGuests => Adults + Children;
     }

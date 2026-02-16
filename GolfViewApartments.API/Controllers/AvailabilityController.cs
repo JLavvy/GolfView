@@ -1,3 +1,15 @@
+// using GolfViewApartments.API.Common.Responses;
+// using GolfViewApartments.API.DTOs;
+// using GolfViewApartments.API.Models;
+// using GolfViewApartments.API.Services.Interfaces;
+// using GolfViewApartments.API.Data;
+// using Microsoft.AspNetCore.Mvc;
+// namespace GolfViewApartments.API.Controllers
+// {
+//     /// <summary>
+//     /// Manages apartment availability and search
+//     /// </summary>
+
 // [ApiController]
 // [Route("api/[controller]")]
 // public class AvailabilityController : ControllerBase
@@ -14,4 +26,5 @@
 //     {
 //         // Returns only apartments with available rooms
 //     }
+// }
 // }
