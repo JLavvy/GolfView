@@ -3,6 +3,7 @@ using System;
 using GolfViewApartments.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GolfViewApartments.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260217090650_RemovePricingAddDisplayFields")]
+    partial class RemovePricingAddDisplayFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
@@ -112,20 +115,21 @@ namespace GolfViewApartments.API.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("DailyBB")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("Bedrooms")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<decimal>("DailyBedOnly")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("MaxGuests")
                         .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("MonthlyBB")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("MonthlyBedOnly")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -154,11 +158,10 @@ namespace GolfViewApartments.API.Migrations
                         {
                             Id = 1,
                             ApartmentId = "studio-apartment",
-                            DailyBB = 0m,
-                            DailyBedOnly = 0m,
+                            Bedrooms = 0,
+                            Description = "A cozy studio apartment ideal for solo travellers or couples.",
+                            Image = "/images/studio.jpg",
                             MaxGuests = 2,
-                            MonthlyBB = 0m,
-                            MonthlyBedOnly = 0m,
                             Name = "Studio Apartment",
                             Size = "24 sqm",
                             TotalUnits = 13,
@@ -168,11 +171,10 @@ namespace GolfViewApartments.API.Migrations
                         {
                             Id = 2,
                             ApartmentId = "one-bedroom-apartment",
-                            DailyBB = 0m,
-                            DailyBedOnly = 0m,
+                            Bedrooms = 1,
+                            Description = "A comfortable one bedroom apartment with a separate living area.",
+                            Image = "/images/one-bedroom.jpg",
                             MaxGuests = 2,
-                            MonthlyBB = 0m,
-                            MonthlyBedOnly = 0m,
                             Name = "One Bedroom Apartment",
                             Size = "30 sqm",
                             TotalUnits = 13,
@@ -182,11 +184,10 @@ namespace GolfViewApartments.API.Migrations
                         {
                             Id = 3,
                             ApartmentId = "two-bedroom-apartment",
-                            DailyBB = 0m,
-                            DailyBedOnly = 0m,
+                            Bedrooms = 2,
+                            Description = "A spacious two bedroom apartment perfect for families or groups.",
+                            Image = "/images/two-bedroom.jpg",
                             MaxGuests = 4,
-                            MonthlyBB = 0m,
-                            MonthlyBedOnly = 0m,
                             Name = "Two Bedroom Apartment",
                             Size = "40 sqm",
                             TotalUnits = 13,
@@ -541,16 +542,16 @@ namespace GolfViewApartments.API.Migrations
                             DayRate = 500m,
                             IconClass = "fa-solid fa-dumbbell",
                             MonthlyRate = 5000m,
-                            Name = "Gym Only"
+                            Name = "Gym"
                         },
                         new
                         {
                             Id = 2,
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             DayRate = 500m,
-                            IconClass = "fa-solid fa-dumbbell",
+                            IconClass = "fa-solid fa-person-swimming",
                             MonthlyRate = 5000m,
-                            Name = "Gym and Pool"
+                            Name = "Swimming Pool"
                         },
                         new
                         {
@@ -559,25 +560,16 @@ namespace GolfViewApartments.API.Migrations
                             DayRate = 1000m,
                             IconClass = "fa-solid fa-water",
                             MonthlyRate = 0m,
-                            Name = "Steam and Sauna (1hr Session)"
+                            Name = "Steam Bath"
                         },
                         new
                         {
                             Id = 4,
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DayRate = 500m,
-                            IconClass = "fa-solid fa-person-swimming",
-                            MonthlyRate = 5000m,
-                            Name = "Pool, Steam and Sauna"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             DayRate = 1000m,
                             IconClass = "fa-solid fa-hot-tub-person",
-                            MonthlyRate = 5000m,
-                            Name = "Gym, Pool, Steam and Sauna"
+                            MonthlyRate = 0m,
+                            Name = "Sauna"
                         });
                 });
 
@@ -656,57 +648,30 @@ namespace GolfViewApartments.API.Migrations
                             ApartmentId = 1,
                             Floor = 0,
                             IsAvailable = true,
-                            Number = "G01",
-                            Type = "Studio"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            ApartmentId = 2,
-                            Floor = 0,
-                            IsAvailable = true,
-                            Number = "G02",
-                            Type = "1 Bedroom"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            ApartmentId = 3,
-                            Floor = 0,
-                            IsAvailable = true,
-                            Number = "G03",
-                            Type = "2 Bedroom"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            ApartmentId = 1,
-                            Floor = 1,
-                            IsAvailable = true,
                             Number = "101",
                             Type = "Studio"
                         },
                         new
                         {
-                            Id = 5,
-                            ApartmentId = 2,
-                            Floor = 1,
+                            Id = 2,
+                            ApartmentId = 1,
+                            Floor = 0,
                             IsAvailable = true,
                             Number = "102",
-                            Type = "1 Bedroom"
+                            Type = "Studio"
                         },
                         new
                         {
-                            Id = 6,
-                            ApartmentId = 3,
+                            Id = 3,
+                            ApartmentId = 1,
                             Floor = 1,
                             IsAvailable = true,
                             Number = "103",
-                            Type = "2 Bedroom"
+                            Type = "Studio"
                         },
                         new
                         {
-                            Id = 7,
+                            Id = 4,
                             ApartmentId = 1,
                             Floor = 1,
                             IsAvailable = true,
@@ -715,61 +680,124 @@ namespace GolfViewApartments.API.Migrations
                         },
                         new
                         {
-                            Id = 8,
-                            ApartmentId = 2,
-                            Floor = 1,
+                            Id = 5,
+                            ApartmentId = 1,
+                            Floor = 2,
                             IsAvailable = true,
                             Number = "105",
-                            Type = "1 Bedroom"
+                            Type = "Studio"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            ApartmentId = 1,
+                            Floor = 2,
+                            IsAvailable = true,
+                            Number = "106",
+                            Type = "Studio"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            ApartmentId = 1,
+                            Floor = 3,
+                            IsAvailable = true,
+                            Number = "107",
+                            Type = "Studio"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            ApartmentId = 1,
+                            Floor = 3,
+                            IsAvailable = true,
+                            Number = "108",
+                            Type = "Studio"
                         },
                         new
                         {
                             Id = 9,
-                            ApartmentId = 3,
-                            Floor = 1,
+                            ApartmentId = 1,
+                            Floor = 4,
                             IsAvailable = true,
-                            Number = "106",
-                            Type = "2 Bedroom"
+                            Number = "109",
+                            Type = "Studio"
                         },
                         new
                         {
                             Id = 10,
                             ApartmentId = 1,
-                            Floor = 2,
+                            Floor = 4,
                             IsAvailable = true,
-                            Number = "201",
+                            Number = "1010",
                             Type = "Studio"
                         },
                         new
                         {
                             Id = 11,
+                            ApartmentId = 1,
+                            Floor = 5,
+                            IsAvailable = true,
+                            Number = "1011",
+                            Type = "Studio"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            ApartmentId = 1,
+                            Floor = 5,
+                            IsAvailable = true,
+                            Number = "1012",
+                            Type = "Studio"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            ApartmentId = 1,
+                            Floor = 6,
+                            IsAvailable = true,
+                            Number = "1013",
+                            Type = "Studio"
+                        },
+                        new
+                        {
+                            Id = 14,
                             ApartmentId = 2,
-                            Floor = 2,
+                            Floor = 0,
+                            IsAvailable = true,
+                            Number = "201",
+                            Type = "1 Bedroom"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            ApartmentId = 2,
+                            Floor = 0,
                             IsAvailable = true,
                             Number = "202",
                             Type = "1 Bedroom"
                         },
                         new
                         {
-                            Id = 12,
-                            ApartmentId = 3,
-                            Floor = 2,
+                            Id = 16,
+                            ApartmentId = 2,
+                            Floor = 1,
                             IsAvailable = true,
                             Number = "203",
-                            Type = "2 Bedroom"
+                            Type = "1 Bedroom"
                         },
                         new
                         {
-                            Id = 13,
-                            ApartmentId = 1,
-                            Floor = 2,
+                            Id = 17,
+                            ApartmentId = 2,
+                            Floor = 1,
                             IsAvailable = true,
                             Number = "204",
-                            Type = "Studio"
+                            Type = "1 Bedroom"
                         },
                         new
                         {
-                            Id = 14,
+                            Id = 18,
                             ApartmentId = 2,
                             Floor = 2,
                             IsAvailable = true,
@@ -778,48 +806,12 @@ namespace GolfViewApartments.API.Migrations
                         },
                         new
                         {
-                            Id = 15,
-                            ApartmentId = 3,
+                            Id = 19,
+                            ApartmentId = 2,
                             Floor = 2,
                             IsAvailable = true,
                             Number = "206",
-                            Type = "2 Bedroom"
-                        },
-                        new
-                        {
-                            Id = 16,
-                            ApartmentId = 1,
-                            Floor = 3,
-                            IsAvailable = true,
-                            Number = "301",
-                            Type = "Studio"
-                        },
-                        new
-                        {
-                            Id = 17,
-                            ApartmentId = 2,
-                            Floor = 3,
-                            IsAvailable = true,
-                            Number = "302",
                             Type = "1 Bedroom"
-                        },
-                        new
-                        {
-                            Id = 18,
-                            ApartmentId = 3,
-                            Floor = 3,
-                            IsAvailable = true,
-                            Number = "303",
-                            Type = "2 Bedroom"
-                        },
-                        new
-                        {
-                            Id = 19,
-                            ApartmentId = 1,
-                            Floor = 3,
-                            IsAvailable = true,
-                            Number = "304",
-                            Type = "Studio"
                         },
                         new
                         {
@@ -827,26 +819,26 @@ namespace GolfViewApartments.API.Migrations
                             ApartmentId = 2,
                             Floor = 3,
                             IsAvailable = true,
-                            Number = "305",
+                            Number = "207",
                             Type = "1 Bedroom"
                         },
                         new
                         {
                             Id = 21,
-                            ApartmentId = 3,
+                            ApartmentId = 2,
                             Floor = 3,
                             IsAvailable = true,
-                            Number = "306",
-                            Type = "2 Bedroom"
+                            Number = "208",
+                            Type = "1 Bedroom"
                         },
                         new
                         {
                             Id = 22,
-                            ApartmentId = 1,
+                            ApartmentId = 2,
                             Floor = 4,
                             IsAvailable = true,
-                            Number = "401",
-                            Type = "Studio"
+                            Number = "209",
+                            Type = "1 Bedroom"
                         },
                         new
                         {
@@ -854,143 +846,143 @@ namespace GolfViewApartments.API.Migrations
                             ApartmentId = 2,
                             Floor = 4,
                             IsAvailable = true,
-                            Number = "402",
+                            Number = "2010",
                             Type = "1 Bedroom"
                         },
                         new
                         {
                             Id = 24,
-                            ApartmentId = 3,
-                            Floor = 4,
+                            ApartmentId = 2,
+                            Floor = 5,
                             IsAvailable = true,
-                            Number = "403",
-                            Type = "2 Bedroom"
+                            Number = "2011",
+                            Type = "1 Bedroom"
                         },
                         new
                         {
                             Id = 25,
-                            ApartmentId = 1,
-                            Floor = 4,
+                            ApartmentId = 2,
+                            Floor = 5,
                             IsAvailable = true,
-                            Number = "404",
-                            Type = "Studio"
+                            Number = "2012",
+                            Type = "1 Bedroom"
                         },
                         new
                         {
                             Id = 26,
                             ApartmentId = 2,
-                            Floor = 4,
+                            Floor = 6,
                             IsAvailable = true,
-                            Number = "405",
+                            Number = "2013",
                             Type = "1 Bedroom"
                         },
                         new
                         {
                             Id = 27,
                             ApartmentId = 3,
-                            Floor = 4,
+                            Floor = 0,
                             IsAvailable = true,
-                            Number = "406",
+                            Number = "301",
                             Type = "2 Bedroom"
                         },
                         new
                         {
                             Id = 28,
-                            ApartmentId = 1,
-                            Floor = 5,
+                            ApartmentId = 3,
+                            Floor = 0,
                             IsAvailable = true,
-                            Number = "501",
-                            Type = "Studio"
+                            Number = "302",
+                            Type = "2 Bedroom"
                         },
                         new
                         {
                             Id = 29,
-                            ApartmentId = 2,
-                            Floor = 5,
+                            ApartmentId = 3,
+                            Floor = 1,
                             IsAvailable = true,
-                            Number = "502",
-                            Type = "1 Bedroom"
+                            Number = "303",
+                            Type = "2 Bedroom"
                         },
                         new
                         {
                             Id = 30,
                             ApartmentId = 3,
-                            Floor = 5,
+                            Floor = 1,
                             IsAvailable = true,
-                            Number = "503",
+                            Number = "304",
                             Type = "2 Bedroom"
                         },
                         new
                         {
                             Id = 31,
-                            ApartmentId = 1,
-                            Floor = 5,
+                            ApartmentId = 3,
+                            Floor = 2,
                             IsAvailable = true,
-                            Number = "504",
-                            Type = "Studio"
+                            Number = "305",
+                            Type = "2 Bedroom"
                         },
                         new
                         {
                             Id = 32,
-                            ApartmentId = 2,
-                            Floor = 5,
+                            ApartmentId = 3,
+                            Floor = 2,
                             IsAvailable = true,
-                            Number = "505",
-                            Type = "1 Bedroom"
+                            Number = "306",
+                            Type = "2 Bedroom"
                         },
                         new
                         {
                             Id = 33,
                             ApartmentId = 3,
-                            Floor = 5,
+                            Floor = 3,
                             IsAvailable = true,
-                            Number = "506",
+                            Number = "307",
                             Type = "2 Bedroom"
                         },
                         new
                         {
                             Id = 34,
-                            ApartmentId = 1,
-                            Floor = 6,
+                            ApartmentId = 3,
+                            Floor = 3,
                             IsAvailable = true,
-                            Number = "601",
-                            Type = "Studio"
+                            Number = "308",
+                            Type = "2 Bedroom"
                         },
                         new
                         {
                             Id = 35,
-                            ApartmentId = 2,
-                            Floor = 6,
+                            ApartmentId = 3,
+                            Floor = 4,
                             IsAvailable = true,
-                            Number = "602",
-                            Type = "1 Bedroom"
+                            Number = "309",
+                            Type = "2 Bedroom"
                         },
                         new
                         {
                             Id = 36,
                             ApartmentId = 3,
-                            Floor = 6,
+                            Floor = 4,
                             IsAvailable = true,
-                            Number = "603",
+                            Number = "3010",
                             Type = "2 Bedroom"
                         },
                         new
                         {
                             Id = 37,
-                            ApartmentId = 1,
-                            Floor = 6,
+                            ApartmentId = 3,
+                            Floor = 5,
                             IsAvailable = true,
-                            Number = "604",
-                            Type = "Studio"
+                            Number = "3011",
+                            Type = "2 Bedroom"
                         },
                         new
                         {
                             Id = 38,
-                            ApartmentId = 2,
-                            Floor = 6,
+                            ApartmentId = 3,
+                            Floor = 5,
                             IsAvailable = true,
-                            Number = "605",
-                            Type = "1 Bedroom"
+                            Number = "3012",
+                            Type = "2 Bedroom"
                         },
                         new
                         {
@@ -998,7 +990,7 @@ namespace GolfViewApartments.API.Migrations
                             ApartmentId = 3,
                             Floor = 6,
                             IsAvailable = true,
-                            Number = "606",
+                            Number = "3013",
                             Type = "2 Bedroom"
                         });
                 });

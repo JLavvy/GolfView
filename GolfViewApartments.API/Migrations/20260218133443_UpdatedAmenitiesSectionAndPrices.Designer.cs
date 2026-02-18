@@ -3,6 +3,7 @@ using System;
 using GolfViewApartments.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GolfViewApartments.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260218133443_UpdatedAmenitiesSectionAndPrices")]
+    partial class UpdatedAmenitiesSectionAndPrices
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
@@ -559,7 +562,7 @@ namespace GolfViewApartments.API.Migrations
                             DayRate = 1000m,
                             IconClass = "fa-solid fa-water",
                             MonthlyRate = 0m,
-                            Name = "Steam and Sauna (1hr Session)"
+                            Name = "Steam and Sauna"
                         },
                         new
                         {

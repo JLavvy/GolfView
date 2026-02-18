@@ -36,7 +36,6 @@ namespace GolfViewApartments.API.Data
             {
                 entity.HasKey(e => e.Id);
 
-                // Properties
                 entity.Property(e => e.BookingReference)
                     .IsRequired()
                     .HasMaxLength(50);
@@ -45,18 +44,15 @@ namespace GolfViewApartments.API.Data
                     .IsRequired()
                     .HasMaxLength(20);
 
-                // NEW: RoomType as enum (stored as string)
                 entity.Property(e => e.RoomType)
                     .IsRequired()
                     .HasConversion<string>()
                     .HasMaxLength(50);
 
-                // NEW: BoardType
                 entity.Property(e => e.BoardType)
                     .IsRequired()
                     .HasMaxLength(50);
 
-                // NEW: Occupancy
                 entity.Property(e => e.Occupancy)
                     .IsRequired()
                     .HasMaxLength(20);
@@ -91,7 +87,6 @@ namespace GolfViewApartments.API.Data
                 entity.Property(e => e.CreatedAt)
                     .IsRequired();
 
-                // Relationships - KEEP BOTH!
                 entity.HasOne(e => e.Customer)
                     .WithMany(c => c.Bookings)
                     .HasForeignKey(e => e.CustomerId)
@@ -102,7 +97,6 @@ namespace GolfViewApartments.API.Data
                     .HasForeignKey(e => e.ApartmentId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Indexes
                 entity.HasIndex(e => e.BookingReference)
                     .IsUnique()
                     .HasDatabaseName("IX_Bookings_BookingReference");
@@ -113,7 +107,6 @@ namespace GolfViewApartments.API.Data
                 entity.HasIndex(e => new { e.ApartmentId, e.CheckIn, e.CheckOut })
                     .HasDatabaseName("IX_Bookings_Apartment_Dates");
 
-                // NEW INDEXES
                 entity.HasIndex(e => new { e.RoomType, e.CheckIn, e.CheckOut })
                     .HasDatabaseName("IX_Bookings_RoomType_Dates");
 
@@ -202,10 +195,7 @@ namespace GolfViewApartments.API.Data
                     Size = "24 sqm",
                     MaxGuests = 2,
                     TotalUnits = 13,
-                    DailyBedOnly = 85,
-                    DailyBB = 100,
-                    MonthlyBedOnly = 1800,
-                    MonthlyBB = 2100
+                   
                 },
                 new Apartment
                 {
@@ -216,10 +206,7 @@ namespace GolfViewApartments.API.Data
                     Size = "30 sqm",
                     MaxGuests = 2,
                     TotalUnits = 13,
-                    DailyBedOnly = 120,
-                    DailyBB = 140,
-                    MonthlyBedOnly = 2800,
-                    MonthlyBB = 3200
+                    
                 },
                 new Apartment
                 {
@@ -230,59 +217,66 @@ namespace GolfViewApartments.API.Data
                     Size = "40 sqm",
                     MaxGuests = 4,
                     TotalUnits = 13,
-                    DailyBedOnly = 180,
-                    DailyBB = 220,
-                    MonthlyBedOnly = 4200,
-                    MonthlyBB = 4800
+                 
                 }
             );
 
             // ========================================
             // SEED DATA: ROOMS
             // ========================================
+            // Mirrors ApartmentData.GetBuildingLayout() exactly:
+            // 7 floors (0=Ground, 1-6=upper)
+            // FloorDistribution = [1, 2, 2, 2, 2, 2, 2] per type
+            // Units interleaved per floor: Studio(0), 1-Bed(1), 2-Bed(2) via i % 3
+            // Room number = floorPrefix + unitCounter (D2)
+            //
+            // Result:
+            //   Ground: G01(S), G02(1B), G03(2B)
+            //   Floor1: 101(S), 102(1B), 103(2B), 104(S), 105(1B), 106(2B)
+            //   Floor2: 201(S), 202(1B), 203(2B), 204(S), 205(1B), 206(2B)
+            //   ... same pattern for floors 3-6
+
             var rooms = new List<Room>();
             int roomId = 1;
 
-            // Studio rooms (101-113)
-            for (int i = 1; i <= 13; i++)
-            {
-                rooms.Add(new Room
-                {
-                    Id = roomId++,
-                    Number = $"10{i}",
-                    ApartmentId = 1,
-                    Type = "Studio",
-                    Floor = (i - 1) / 2,
-                    IsAvailable = true
-                });
-            }
+            var floorDistribution = new[] { 1, 2, 2, 2, 2, 2, 2 }; // units per type per floor
 
-            // 1 Bedroom rooms (201-213)
-            for (int i = 1; i <= 13; i++)
+            for (int floorIndex = 0; floorIndex < 7; floorIndex++)
             {
-                rooms.Add(new Room
-                {
-                    Id = roomId++,
-                    Number = $"20{i}",
-                    ApartmentId = 2,
-                    Type = "1 Bedroom",
-                    Floor = (i - 1) / 2,
-                    IsAvailable = true
-                });
-            }
+                var floorPrefix = floorIndex == 0 ? "G" : floorIndex.ToString();
+                var unitsPerType = floorDistribution[floorIndex];
+                var totalUnits = unitsPerType * 3;
 
-            // 2 Bedroom rooms (301-313)
-            for (int i = 1; i <= 13; i++)
-            {
-                rooms.Add(new Room
+                var unitCounter = 1;
+                var studioIdx = 0;
+                var oneBedroomIdx = 0;
+                var twoBedroomIdx = 0;
+
+                for (int i = 0; i < totalUnits; i++)
                 {
-                    Id = roomId++,
-                    Number = $"30{i}",
-                    ApartmentId = 3,
-                    Type = "2 Bedroom",
-                    Floor = (i - 1) / 2,
-                    IsAvailable = true
-                });
+                    var unitType = i % 3;
+                    var roomNumber = $"{floorPrefix}{unitCounter:D2}";
+
+                    if (unitType == 0 && studioIdx < unitsPerType)
+                    {
+                        rooms.Add(new Room { Id = roomId++, Number = roomNumber, ApartmentId = 1, Type = "Studio", Floor = floorIndex, IsAvailable = true });
+                        studioIdx++; unitCounter++;
+                    }
+                    else if (unitType == 1 && oneBedroomIdx < unitsPerType)
+                    {
+                        rooms.Add(new Room { Id = roomId++, Number = roomNumber, ApartmentId = 2, Type = "1 Bedroom", Floor = floorIndex, IsAvailable = true });
+                        oneBedroomIdx++; unitCounter++;
+                    }
+                    else if (unitType == 2 && twoBedroomIdx < unitsPerType)
+                    {
+                        rooms.Add(new Room { Id = roomId++, Number = roomNumber, ApartmentId = 3, Type = "2 Bedroom", Floor = floorIndex, IsAvailable = true });
+                        twoBedroomIdx++; unitCounter++;
+                    }
+                    else
+                    {
+                        i--; // type exhausted, retry
+                    }
+                }
             }
 
             modelBuilder.Entity<Room>().HasData(rooms);
@@ -438,7 +432,7 @@ namespace GolfViewApartments.API.Data
                 new FitnessAmenity
                 {
                     Id = 1,
-                    Name = "Gym",
+                    Name = "Gym Only",
                     IconClass = "fa-solid fa-dumbbell",
                     DayRate = 500m,
                     MonthlyRate = 5000m,
@@ -447,16 +441,16 @@ namespace GolfViewApartments.API.Data
                 new FitnessAmenity
                 {
                     Id = 2,
-                    Name = "Swimming Pool",
-                    IconClass = "fa-solid fa-person-swimming",
+                    Name = "Gym and Pool",
+                    IconClass = "fa-solid fa-dumbbell",
                     DayRate = 500m,
                     MonthlyRate = 5000m,
                     CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 },
-                new FitnessAmenity
+                 new FitnessAmenity
                 {
                     Id = 3,
-                    Name = "Steam Bath",
+                    Name = "Steam and Sauna (1hr Session)",
                     IconClass = "fa-solid fa-water",
                     DayRate = 1000m,
                     MonthlyRate = 0m,
@@ -465,10 +459,20 @@ namespace GolfViewApartments.API.Data
                 new FitnessAmenity
                 {
                     Id = 4,
-                    Name = "Sauna",
+                    Name = "Pool, Steam and Sauna",
+                    IconClass = "fa-solid fa-person-swimming",
+                    DayRate = 500m,
+                    MonthlyRate = 5000m,
+                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                },
+               
+                new FitnessAmenity
+                {
+                    Id = 5,
+                    Name = "Gym, Pool, Steam and Sauna",
                     IconClass = "fa-solid fa-hot-tub-person",
                     DayRate = 1000m,
-                    MonthlyRate = 0m,
+                    MonthlyRate = 5000m,
                     CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 }
             );

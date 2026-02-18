@@ -3,6 +3,7 @@ using System;
 using GolfViewApartments.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GolfViewApartments.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260218095205_FixRoomNumbersToMatchLayout")]
+    partial class FixRoomNumbersToMatchLayout
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
@@ -154,11 +157,11 @@ namespace GolfViewApartments.API.Migrations
                         {
                             Id = 1,
                             ApartmentId = "studio-apartment",
-                            DailyBB = 0m,
-                            DailyBedOnly = 0m,
+                            DailyBB = 100m,
+                            DailyBedOnly = 85m,
                             MaxGuests = 2,
-                            MonthlyBB = 0m,
-                            MonthlyBedOnly = 0m,
+                            MonthlyBB = 2100m,
+                            MonthlyBedOnly = 1800m,
                             Name = "Studio Apartment",
                             Size = "24 sqm",
                             TotalUnits = 13,
@@ -168,11 +171,11 @@ namespace GolfViewApartments.API.Migrations
                         {
                             Id = 2,
                             ApartmentId = "one-bedroom-apartment",
-                            DailyBB = 0m,
-                            DailyBedOnly = 0m,
+                            DailyBB = 140m,
+                            DailyBedOnly = 120m,
                             MaxGuests = 2,
-                            MonthlyBB = 0m,
-                            MonthlyBedOnly = 0m,
+                            MonthlyBB = 3200m,
+                            MonthlyBedOnly = 2800m,
                             Name = "One Bedroom Apartment",
                             Size = "30 sqm",
                             TotalUnits = 13,
@@ -182,11 +185,11 @@ namespace GolfViewApartments.API.Migrations
                         {
                             Id = 3,
                             ApartmentId = "two-bedroom-apartment",
-                            DailyBB = 0m,
-                            DailyBedOnly = 0m,
+                            DailyBB = 220m,
+                            DailyBedOnly = 180m,
                             MaxGuests = 4,
-                            MonthlyBB = 0m,
-                            MonthlyBedOnly = 0m,
+                            MonthlyBB = 4800m,
+                            MonthlyBedOnly = 4200m,
                             Name = "Two Bedroom Apartment",
                             Size = "40 sqm",
                             TotalUnits = 13,
@@ -541,16 +544,16 @@ namespace GolfViewApartments.API.Migrations
                             DayRate = 500m,
                             IconClass = "fa-solid fa-dumbbell",
                             MonthlyRate = 5000m,
-                            Name = "Gym Only"
+                            Name = "Gym"
                         },
                         new
                         {
                             Id = 2,
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             DayRate = 500m,
-                            IconClass = "fa-solid fa-dumbbell",
+                            IconClass = "fa-solid fa-person-swimming",
                             MonthlyRate = 5000m,
-                            Name = "Gym and Pool"
+                            Name = "Swimming Pool"
                         },
                         new
                         {
@@ -559,25 +562,16 @@ namespace GolfViewApartments.API.Migrations
                             DayRate = 1000m,
                             IconClass = "fa-solid fa-water",
                             MonthlyRate = 0m,
-                            Name = "Steam and Sauna (1hr Session)"
+                            Name = "Steam Bath"
                         },
                         new
                         {
                             Id = 4,
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            DayRate = 500m,
-                            IconClass = "fa-solid fa-person-swimming",
-                            MonthlyRate = 5000m,
-                            Name = "Pool, Steam and Sauna"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             DayRate = 1000m,
                             IconClass = "fa-solid fa-hot-tub-person",
-                            MonthlyRate = 5000m,
-                            Name = "Gym, Pool, Steam and Sauna"
+                            MonthlyRate = 0m,
+                            Name = "Sauna"
                         });
                 });
 

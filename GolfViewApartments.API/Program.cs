@@ -4,7 +4,7 @@ using GolfViewApartments.API.Repositories.Interfaces;
 using GolfViewApartments.API.Services.Implementations;
 using GolfViewApartments.API.Services.Interfaces;
 using GolfViewApartments.API.Services;
-using GolfViewApartments.API.Models; // ADD THIS LINE
+using GolfViewApartments.API.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -28,7 +28,6 @@ if (File.Exists(envPath))
 // Load .env file
 Env.Load();
 
-// Check if variables are loaded
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
 var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
 var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
@@ -47,7 +46,6 @@ if (string.IsNullOrEmpty(jwtKey))
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Map to configuration
 builder.Configuration["Jwt:Key"] = jwtKey;
 builder.Configuration["Jwt:Issuer"] = jwtIssuer;
 builder.Configuration["Jwt:Audience"] = jwtAudience;
@@ -57,7 +55,6 @@ builder.Configuration["Jwt:ExpiryMinutes"] = Environment.GetEnvironmentVariable(
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -99,25 +96,25 @@ builder.Services.AddCors(options =>
 });
 
 // Repositories
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>(); // ← ADDED: required by ApartmentService
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IRoomRepository, RoomRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 
-// SERVICES
+// Services
+builder.Services.AddScoped<IApartmentService, ApartmentService>(); // ← ADDED: was missing
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IPricingService, PricingService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-
-
+// builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 
 // BUILD THE APP FIRST
 var app = builder.Build();
 
 // ---------------- MIDDLEWARE ----------------
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -129,10 +126,9 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ApplicationDbContext>();
-    
+
     await context.Database.MigrateAsync();
-    
-    // Seed default admin user
+
     if (!context.Admins.Any(a => a.Email == "admin@golfview.com"))
     {
         var admin = new Admin
@@ -145,9 +141,9 @@ using (var scope = app.Services.CreateScope())
         await context.SaveChangesAsync();
         Console.WriteLine("Default admin user created successfully.");
     }
-    
+
     var seeder = new DataSeeder(context);
-    await seeder.SeedAsync(); 
+    await seeder.SeedAsync();
 }
 
 app.UseHttpsRedirection();

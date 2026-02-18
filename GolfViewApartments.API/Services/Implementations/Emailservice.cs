@@ -71,7 +71,7 @@ namespace GolfViewApartments.API.Services.Implementations
 
                 var mailMessage = new MailMessage
                 {
-                    From = new MailAddress(fromEmail, fromName ?? "Golf View Apartments"),
+                    From = new MailAddress(fromEmail, fromName ?? "GolfView Apartments"),
                     Subject = $"Booking Confirmation - {emailData.BookingReference}",
                     Body = GenerateEmailBody(emailData),
                     IsBodyHtml = true
@@ -291,8 +291,8 @@ namespace GolfViewApartments.API.Services.Implementations
                                 <h4 style=""margin: 0 0 15px 0; color: #374151; font-size: 16px;"">Need Help?</h4>
                                 <p style=""margin: 0 0 8px 0; color: #6B7280; font-size: 14px;"">
                                     <strong>Email:</strong> 
-                                    <a href=""mailto:info@golfviewapartments.com"" style=""color: #2C5F2D; text-decoration: none;"">
-                                        info@golfviewapartments.com
+                                    <a href=""mailto:lapfund9@gmail.com"" style=""color: #2C5F2D; text-decoration: none;"">
+                                        lapfund9@gmail.com
                                     </a>
                                 </p>
                                 <p style=""margin: 0; color: #6B7280; font-size: 14px;"">
@@ -313,7 +313,7 @@ namespace GolfViewApartments.API.Services.Implementations
                                 Your home away from home
                             </p>
                             <p style=""margin: 0; color: #ffffff; opacity: 0.8; font-size: 12px;"">
-                                © 2026 Golf View Apartments. All rights reserved.
+                                © 2026 GolfView Apartments. All rights reserved.
                             </p>
                         </td>
                     </tr>
