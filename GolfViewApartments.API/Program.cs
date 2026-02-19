@@ -109,7 +109,7 @@ builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IPricingService, PricingService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-// builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
+builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 
 // BUILD THE APP FIRST
 var app = builder.Build();

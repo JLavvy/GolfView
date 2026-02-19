@@ -1,6 +1,6 @@
 using GolfViewApartments.API.Data;
 using GolfViewApartments.API.Repositories.Interfaces;
-using GolfViewApartments.API.Repositories.Implementations; // ADD THIS LINE
+using GolfViewApartments.API.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace GolfViewApartments.API.Repositories.Implementations
@@ -19,13 +19,13 @@ namespace GolfViewApartments.API.Repositories.Implementations
         private IContactInfoRepository? _contactInfo;
         private IPhotoRepository? _photos;
         private IAmenityPricingRepository? _amenityPricing;
+        private IRoomRatesRepository? _roomRates;
 
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // Repository properties with lazy initialization
         public IApartmentRepository Apartments
         {
             get
@@ -98,6 +98,15 @@ namespace GolfViewApartments.API.Repositories.Implementations
             }
         }
 
+        public IRoomRatesRepository RoomRates
+        {
+            get
+            {
+                _roomRates ??= new RoomRatesRepository(_context);
+                return _roomRates;
+            }
+        }
+
         // Transaction management
         public async Task<int> SaveChangesAsync()
         {
@@ -114,11 +123,9 @@ namespace GolfViewApartments.API.Repositories.Implementations
             try
             {
                 await _context.SaveChangesAsync();
-                
+
                 if (_transaction != null)
-                {
                     await _transaction.CommitAsync();
-                }
             }
             catch
             {
@@ -145,7 +152,6 @@ namespace GolfViewApartments.API.Repositories.Implementations
             }
         }
 
-        // Dispose pattern
         public void Dispose()
         {
             _transaction?.Dispose();

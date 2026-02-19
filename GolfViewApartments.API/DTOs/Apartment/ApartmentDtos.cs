@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+using GolfViewApartments.API.DTOs;
 
 namespace GolfViewApartments.API.DTOs.Apartment
 {
@@ -14,11 +14,13 @@ namespace GolfViewApartments.API.DTOs.Apartment
         public string Size { get; set; } = string.Empty;
         public int MaxGuests { get; set; }
         public int TotalUnits { get; set; }
-        public decimal DailyBedOnly { get; set; }
-        public decimal DailyBB { get; set; }
-        public decimal MonthlyBedOnly { get; set; }
-        public decimal MonthlyBB { get; set; }
         public int AvailableRooms { get; set; }
+
+        /// <summary>
+        /// All board type rates for this apartment's room type.
+        /// Sourced from RoomRate table via RoomType → RoomRate.
+        /// </summary>
+        public List<RoomRateDto> Rates { get; set; } = new();
     }
 
     // ============================================
@@ -30,28 +32,11 @@ namespace GolfViewApartments.API.DTOs.Apartment
         public string Name { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;
         public int AvailableRooms { get; set; }
+
+        /// <summary>
+        /// Lowest single occupancy / Bed Only rate for this apartment type.
+        /// Sourced from RoomRate table, not the Apartment table.
+        /// </summary>
         public decimal StartingPrice { get; set; }
-    }
-
-    // ============================================
-    // UPDATE APARTMENT PRICING DTO
-    // ============================================
-    public class UpdateApartmentPricingDto
-    {
-        [Required]
-        [Range(0, 999999)]
-        public decimal DailyBedOnly { get; set; }
-
-        [Required]
-        [Range(0, 999999)]
-        public decimal DailyBB { get; set; }
-
-        [Required]
-        [Range(0, 999999)]
-        public decimal MonthlyBedOnly { get; set; }
-
-        [Required]
-        [Range(0, 999999)]
-        public decimal MonthlyBB { get; set; }
     }
 }

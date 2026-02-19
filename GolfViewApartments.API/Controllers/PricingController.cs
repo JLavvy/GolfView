@@ -215,5 +215,51 @@ namespace GolfViewApartments.API.Controllers
         {
             return await _context.AmenityPricing.ToListAsync();
         }
+
+        // ADD THIS ENDPOINT to your existing PricingController.cs
+// inside the PricingController class
+
+/// <summary>
+/// Get the nightly rate for a specific room type, board type, and occupancy.
+/// Called by Booking.razor and AvailabilityCalendar.razor
+/// GET api/pricing/rate?roomType=Studio&boardType=Bed+Only&occupancyType=Single
+/// </summary>
+[HttpGet("rate")]
+public async Task<ActionResult<decimal>> GetRate(
+    [FromQuery] string roomType,
+    [FromQuery] string boardType,
+    [FromQuery] string occupancyType)
+{
+    if (string.IsNullOrEmpty(roomType) || string.IsNullOrEmpty(boardType) || string.IsNullOrEmpty(occupancyType))
+        return BadRequest("roomType, boardType, and occupancyType are required.");
+
+    if (!Enum.TryParse<RoomTypeEnum>(roomType, out var roomTypeEnum))
+        return BadRequest($"Invalid roomType: {roomType}");
+
+    var roomType_db = await _context.RoomTypes
+        .Include(rt => rt.Rates)
+        .FirstOrDefaultAsync(rt => rt.RoomTypeEnum == roomTypeEnum);
+
+    if (roomType_db == null)
+        return NotFound($"Room type '{roomType}' not found.");
+
+    var rate = roomType_db.Rates.FirstOrDefault(r => r.BoardType == boardType);
+
+    if (rate == null)
+        return NotFound($"No rate found for board type '{boardType}'.");
+
+    var price = occupancyType switch
+    {
+        "Single"    => rate.FirstOccupancy,
+        "Double"    => rate.SecondOccupancy,
+        "Quadruple" => rate.SecondOccupancy, // Two-bedroom uses SecondOccupancy as base
+        _ => 0m
+    };
+
+    if (price == 0)
+        return BadRequest($"Invalid occupancyType: {occupancyType}");
+
+    return Ok(price);
+}
     }
 }

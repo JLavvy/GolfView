@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace GolfViewApartments.API.Controllers
 {
     /// <summary>
-    /// Manages apartment information and pricing
+    /// Manages apartment information.
+    /// Pricing is managed via PricingController (PUT api/pricing/roomtypes).
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
@@ -24,7 +25,7 @@ namespace GolfViewApartments.API.Controllers
         }
 
         /// <summary>
-        /// Get all apartments with their details
+        /// Get all apartments with their details and rates
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(ApiResponse<IEnumerable<ApartmentResponseDto>>), StatusCodes.Status200OK)]
@@ -32,7 +33,7 @@ namespace GolfViewApartments.API.Controllers
         {
             var apartments = await _apartmentService.GetAllApartmentsAsync();
             return Ok(ApiResponse<IEnumerable<ApartmentResponseDto>>.SuccessResponse(
-                apartments, 
+                apartments,
                 "Apartments retrieved successfully"));
         }
 
@@ -46,12 +47,12 @@ namespace GolfViewApartments.API.Controllers
         {
             var apartment = await _apartmentService.GetApartmentByIdAsync(id);
             return Ok(ApiResponse<ApartmentResponseDto>.SuccessResponse(
-                apartment, 
+                apartment,
                 "Apartment retrieved successfully"));
         }
 
         /// <summary>
-        /// Get apartment by apartment identifier (e.g., "studio-apartment")
+        /// Get apartment by identifier (e.g., "studio-apartment")
         /// </summary>
         [HttpGet("by-identifier/{apartmentId}")]
         [ProducesResponseType(typeof(ApiResponse<ApartmentResponseDto>), StatusCodes.Status200OK)]
@@ -60,12 +61,12 @@ namespace GolfViewApartments.API.Controllers
         {
             var apartment = await _apartmentService.GetApartmentByApartmentIdAsync(apartmentId);
             return Ok(ApiResponse<ApartmentResponseDto>.SuccessResponse(
-                apartment, 
+                apartment,
                 "Apartment retrieved successfully"));
         }
 
         /// <summary>
-        /// Get apartment summaries (lightweight view)
+        /// Get apartment summaries (lightweight view for listings)
         /// </summary>
         [HttpGet("summaries")]
         [ProducesResponseType(typeof(ApiResponse<IEnumerable<ApartmentSummaryDto>>), StatusCodes.Status200OK)]
@@ -73,31 +74,8 @@ namespace GolfViewApartments.API.Controllers
         {
             var summaries = await _apartmentService.GetApartmentSummariesAsync();
             return Ok(ApiResponse<IEnumerable<ApartmentSummaryDto>>.SuccessResponse(
-                summaries, 
+                summaries,
                 "Apartment summaries retrieved successfully"));
-        }
-
-        /// <summary>
-        /// Update apartment pricing
-        /// </summary>
-        [HttpPut("{id:int}/pricing")]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ApiResponse>> UpdatePricing(
-            int id, 
-            [FromBody] UpdateApartmentPricingDto dto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ApiResponse.FailureResponse(
-                    "Validation failed",
-                    ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()));
-            }
-
-            await _apartmentService.UpdateApartmentPricingAsync(id, dto);
-            
-            return Ok(ApiResponse.SuccessResponse("Apartment pricing updated successfully"));
         }
     }
 }

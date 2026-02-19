@@ -28,6 +28,10 @@ namespace GolfViewApartments.API.Services.Implementations
                 var availableRooms = await _unitOfWork.Rooms
                     .CountAsync(r => r.ApartmentId == apartment.Id && r.IsAvailable);
 
+                // Get rates for this apartment's room type from RoomRate table
+                var rates = await _unitOfWork.RoomRates
+                    .GetByApartmentTypeAsync(apartment.Type);
+
                 apartmentDtos.Add(new ApartmentResponseDto
                 {
                     Id = apartment.Id,
@@ -37,11 +41,8 @@ namespace GolfViewApartments.API.Services.Implementations
                     Size = apartment.Size,
                     MaxGuests = apartment.MaxGuests,
                     TotalUnits = apartment.TotalUnits,
-                    DailyBedOnly = apartment.DailyBedOnly,
-                    DailyBB = apartment.DailyBB,
-                    MonthlyBedOnly = apartment.MonthlyBedOnly,
-                    MonthlyBB = apartment.MonthlyBB,
-                    AvailableRooms = availableRooms
+                    AvailableRooms = availableRooms,
+                    Rates = rates
                 });
             }
 
@@ -54,12 +55,13 @@ namespace GolfViewApartments.API.Services.Implementations
 
             var apartment = await _unitOfWork.Apartments.GetByIdAsync(id);
             if (apartment == null)
-            {
                 throw new NotFoundException(nameof(apartment), id);
-            }
 
             var availableRooms = await _unitOfWork.Rooms
                 .CountAsync(r => r.ApartmentId == apartment.Id && r.IsAvailable);
+
+            var rates = await _unitOfWork.RoomRates
+                .GetByApartmentTypeAsync(apartment.Type);
 
             return new ApartmentResponseDto
             {
@@ -70,11 +72,8 @@ namespace GolfViewApartments.API.Services.Implementations
                 Size = apartment.Size,
                 MaxGuests = apartment.MaxGuests,
                 TotalUnits = apartment.TotalUnits,
-                DailyBedOnly = apartment.DailyBedOnly,
-                DailyBB = apartment.DailyBB,
-                MonthlyBedOnly = apartment.MonthlyBedOnly,
-                MonthlyBB = apartment.MonthlyBB,
-                AvailableRooms = availableRooms
+                AvailableRooms = availableRooms,
+                Rates = rates
             };
         }
 
@@ -84,12 +83,13 @@ namespace GolfViewApartments.API.Services.Implementations
 
             var apartment = await _unitOfWork.Apartments.GetByApartmentIdAsync(apartmentId);
             if (apartment == null)
-            {
                 throw new NotFoundException($"Apartment with ApartmentId '{apartmentId}' not found");
-            }
 
             var availableRooms = await _unitOfWork.Rooms
                 .CountAsync(r => r.ApartmentId == apartment.Id && r.IsAvailable);
+
+            var rates = await _unitOfWork.RoomRates
+                .GetByApartmentTypeAsync(apartment.Type);
 
             return new ApartmentResponseDto
             {
@@ -100,11 +100,8 @@ namespace GolfViewApartments.API.Services.Implementations
                 Size = apartment.Size,
                 MaxGuests = apartment.MaxGuests,
                 TotalUnits = apartment.TotalUnits,
-                DailyBedOnly = apartment.DailyBedOnly,
-                DailyBB = apartment.DailyBB,
-                MonthlyBedOnly = apartment.MonthlyBedOnly,
-                MonthlyBB = apartment.MonthlyBB,
-                AvailableRooms = availableRooms
+                AvailableRooms = availableRooms,
+                Rates = rates
             };
         }
 
@@ -120,39 +117,25 @@ namespace GolfViewApartments.API.Services.Implementations
                 var availableRooms = await _unitOfWork.Rooms
                     .CountAsync(r => r.ApartmentId == apartment.Id && r.IsAvailable);
 
+                // Starting price = lowest SingleOccupancy rate (Bed Only) for this room type
+                var startingRate = await _unitOfWork.RoomRates
+                    .GetStartingRateAsync(apartment.Type);
+
                 summaries.Add(new ApartmentSummaryDto
                 {
                     Id = apartment.Id,
                     Name = apartment.Name,
                     Type = apartment.Type,
                     AvailableRooms = availableRooms,
-                    StartingPrice = apartment.DailyBedOnly
+                    StartingPrice = startingRate
                 });
             }
 
             return summaries;
         }
 
-        public async Task UpdateApartmentPricingAsync(int id, UpdateApartmentPricingDto dto)
-        {
-            _logger.LogInformation("Updating pricing for apartment ID: {ApartmentId}", id);
-
-            var apartment = await _unitOfWork.Apartments.GetByIdAsync(id);
-            if (apartment == null)
-            {
-                throw new NotFoundException(nameof(apartment), id);
-            }
-
-            // Update pricing
-            apartment.DailyBedOnly = dto.DailyBedOnly;
-            apartment.DailyBB = dto.DailyBB;
-            apartment.MonthlyBedOnly = dto.MonthlyBedOnly;
-            apartment.MonthlyBB = dto.MonthlyBB;
-
-            _unitOfWork.Apartments.Update(apartment);
-            await _unitOfWork.SaveChangesAsync();
-
-            _logger.LogInformation("Successfully updated pricing for apartment ID: {ApartmentId}", id);
-        }
+        // UpdateApartmentPricingAsync is removed — pricing is now managed via
+        // PricingController (PUT api/pricing/roomtypes) against the RoomRate table.
+        // If you still need this endpoint, update it through IUnitOfWork.RoomRates instead.
     }
 }

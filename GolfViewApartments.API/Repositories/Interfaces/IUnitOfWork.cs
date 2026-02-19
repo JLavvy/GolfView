@@ -11,6 +11,12 @@ namespace GolfViewApartments.API.Repositories.Interfaces
         IPhotoRepository Photos { get; }
         IAmenityPricingRepository AmenityPricing { get; }
 
+        /// <summary>
+        /// Room rates repository — replaces the old per-column pricing on Apartment.
+        /// Used by ApartmentService to fetch rates by apartment type.
+        /// </summary>
+        IRoomRatesRepository RoomRates { get; }
+
         Task<int> SaveChangesAsync();
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();

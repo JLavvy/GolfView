@@ -15,5 +15,6 @@ namespace GolfViewApartments.API.Services.Interfaces
         Task CancelBookingAsync(int bookingId);
 
         Task<List<RoomAvailabilityDto>> GetAvailableRoomsAsync(string type);
+        Task<List<RoomAvailabilityDto>> GetAvailableRoomsForDatesAsync(string type, DateTime checkIn, DateTime checkOut);
     }
 }

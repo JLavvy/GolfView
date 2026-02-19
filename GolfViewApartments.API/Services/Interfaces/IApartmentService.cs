@@ -8,6 +8,8 @@ namespace GolfViewApartments.API.Services.Interfaces
         Task<ApartmentResponseDto> GetApartmentByIdAsync(int id);
         Task<ApartmentResponseDto> GetApartmentByApartmentIdAsync(string apartmentId);
         Task<IEnumerable<ApartmentSummaryDto>> GetApartmentSummariesAsync();
-        Task UpdateApartmentPricingAsync(int id, UpdateApartmentPricingDto dto);
+
+        // UpdateApartmentPricingAsync removed — pricing is managed via
+        // PricingController (PUT api/pricing/roomtypes) against the RoomRate table.
     }
 }
