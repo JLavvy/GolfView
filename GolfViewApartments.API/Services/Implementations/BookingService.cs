@@ -100,7 +100,6 @@ namespace GolfViewApartments.API.Services
             // 5. Validate or assign room
             if (!string.IsNullOrEmpty(request.Room))
             {
-                // Guest chose a specific room — validate it is actually available
                 var isAvailable = await IsRoomAvailableAsync(
                     request.Room, request.CheckIn, request.CheckOut);
 
@@ -111,7 +110,6 @@ namespace GolfViewApartments.API.Services
             }
             else
             {
-                // No room chosen — auto-assign the first available one
                 var availableRooms = await GetAvailableRoomsForBookingAsync(
                     request.RoomType, request.CheckIn, request.CheckOut);
 
@@ -158,26 +156,8 @@ namespace GolfViewApartments.API.Services
                 request.Adults,
                 request.Children);
 
-            // 10. Validate or accept provided price
-            decimal finalPrice;
-            if (request.TotalPrice.HasValue && request.TotalPrice.Value > 0)
-            {
-                var diff = Math.Abs(request.TotalPrice.Value - calculatedPrice);
-                if (diff > 1.0m)
-                {
-                    _logger.LogWarning(
-                        "Price mismatch: provided {Provided}, calculated {Calculated}",
-                        request.TotalPrice.Value, calculatedPrice);
-                    throw new ArgumentException(
-                        $"Price mismatch: provided {request.TotalPrice.Value:F2} " +
-                        $"does not match calculated {calculatedPrice:F2}");
-                }
-                finalPrice = calculatedPrice;
-            }
-            else
-            {
-                finalPrice = calculatedPrice;
-            }
+            // 10. Always use server-calculated price — ignore any client-provided value
+            decimal finalPrice = calculatedPrice;
 
             // 11. Create booking
             var reference = GenerateBookingReference();
@@ -212,25 +192,66 @@ namespace GolfViewApartments.API.Services
             return await GetBookingByIdAsync(booking.Id);
         }
 
+        public async Task<BookingResponseDto> UpdateBookingAsync(int id, BookingDto request)
+        {
+            var booking = await _context.Bookings.FindAsync(id);
+            if (booking == null)
+                throw new KeyNotFoundException($"Booking with ID {id} not found");
+
+            if (request.CheckOut <= request.CheckIn)
+                throw new ArgumentException("Check-out date must be after check-in date");
+
+            booking.Room            = request.Room;
+            booking.BoardType       = request.BoardType ?? booking.BoardType;
+            booking.Occupancy       = request.Occupancy ?? booking.Occupancy;
+            booking.CheckIn         = request.CheckIn;
+            booking.CheckOut        = request.CheckOut;
+            booking.Adults          = request.Adults;
+            booking.Children        = request.Children;
+            booking.SpecialRequests = request.SpecialRequests;
+            booking.UpdatedAt       = DateTime.UtcNow;
+
+            if (!string.IsNullOrEmpty(request.Status) &&
+                Enum.TryParse<BookingStatus>(request.Status, true, out var status))
+            {
+                booking.Status = status;
+            }
+
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Booking {Id} updated", id);
+
+            return await GetBookingByIdAsync(booking.Id);
+        }
+
+        public async Task DeleteBookingAsync(int id)
+        {
+            var booking = await _context.Bookings.FindAsync(id);
+            if (booking == null)
+                throw new KeyNotFoundException($"Booking with ID {id} not found");
+
+            _context.Bookings.Remove(booking);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Booking {Id} deleted", id);
+        }
+
         // ===== PUBLIC: date-aware room availability =====
-        // Called by BookingsController GET api/bookings/rooms/available?type=Studio&checkIn=...&checkOut=...
-        // This is what Booking.razor calls so the guest can pick their specific room.
 
         public async Task<List<RoomAvailabilityDto>> GetAvailableRoomsForDatesAsync(
             string type,
             DateTime checkIn,
             DateTime checkOut)
         {
-            // Accept both enum names ("Studio") and display strings ("studio", "one-bedroom")
             RoomTypeEnum roomTypeEnum;
 
             if (!Enum.TryParse<RoomTypeEnum>(type, true, out roomTypeEnum))
             {
                 roomTypeEnum = type.ToLower().Replace(" ", "").Replace("-", "") switch
                 {
-                    "studio"      => RoomTypeEnum.Studio,
-                    "onebedroom"  => RoomTypeEnum.OneBedroom,
-                    "twobedroom"  => RoomTypeEnum.TwoBedroom,
+                    "studio"     => RoomTypeEnum.Studio,
+                    "onebedroom" => RoomTypeEnum.OneBedroom,
+                    "twobedroom" => RoomTypeEnum.TwoBedroom,
                     _ => throw new ArgumentException($"Invalid room type: {type}")
                 };
             }
@@ -238,7 +259,6 @@ namespace GolfViewApartments.API.Services
             return await GetAvailableRoomsForBookingAsync(roomTypeEnum, checkIn, checkOut);
         }
 
-        // Keep old method for backward compatibility (used internally)
         public async Task<List<RoomAvailabilityDto>> GetAvailableRoomsAsync(string type)
         {
             return await GetAvailableRoomsForDatesAsync(type, DateTime.Today, DateTime.Today.AddDays(1));
@@ -357,9 +377,9 @@ namespace GolfViewApartments.API.Services
             var bookedRoomNumbers = await _context.Bookings
                 .Where(b => b.ApartmentId == apartment.Id &&
                            (b.Status == BookingStatus.Confirmed ||
-                            b.Status == BookingStatus.Pending ||
+                            b.Status == BookingStatus.Pending   ||
                             b.Status == BookingStatus.CheckedIn) &&
-                            b.CheckIn < checkOut &&
+                            b.CheckIn  < checkOut &&
                             b.CheckOut > checkIn)
                 .Select(b => b.Room)
                 .Distinct()
@@ -385,45 +405,45 @@ namespace GolfViewApartments.API.Services
             var hasConflict = await _context.Bookings
                 .AnyAsync(b => b.Room == roomNumber &&
                               (b.Status == BookingStatus.Confirmed ||
-                               b.Status == BookingStatus.Pending ||
+                               b.Status == BookingStatus.Pending   ||
                                b.Status == BookingStatus.CheckedIn) &&
-                               b.CheckIn < checkOut &&
+                               b.CheckIn  < checkOut &&
                                b.CheckOut > checkIn);
 
             return !hasConflict;
         }
 
         private BookingResponseDto MapToDto(Booking booking)
-        {
-            return new BookingResponseDto
-            {
-                Id               = booking.Id,
-                BookingReference = booking.BookingReference,
-                CustomerId       = booking.CustomerId,
-                Customer         = booking.Customer != null
-                    ? $"{booking.Customer.FirstName} {booking.Customer.LastName}"
-                    : "",
-                Email            = booking.Customer?.Email ?? "",
-                Phone            = booking.Customer?.Phone ?? "",
-                ApartmentId      = booking.ApartmentId,
-                ApartmentName    = booking.Apartment?.Name ?? "",
-                ApartmentType    = booking.Apartment?.Type ?? "",
-                Room             = booking.Room,
-                RoomType         = booking.RoomType.ToString(),
-                BoardType        = booking.BoardType,
-                Occupancy        = booking.Occupancy,
-                CheckIn          = booking.CheckIn,
-                CheckOut         = booking.CheckOut,
-                Adults           = booking.Adults,
-                Children         = booking.Children,
-                ChildrenAges     = booking.ChildrenAges,
-                TotalPrice       = booking.TotalPrice,
-                Status           = booking.Status.ToString(),
-                SpecialRequests  = booking.SpecialRequests,
-                CreatedAt        = booking.CreatedAt,
-                UpdatedAt        = booking.UpdatedAt
-            };
-        }
+{
+    return new BookingResponseDto
+    {
+        Id               = booking.Id,
+        BookingReference = booking.BookingReference,
+        CustomerId       = booking.CustomerId,
+        Customer         = booking.Customer != null
+            ? $"{booking.Customer.FirstName} {booking.Customer.LastName}"
+            : "",
+        Email            = booking.Customer?.Email ?? "",
+        Phone            = booking.Customer?.Phone ?? "",
+        ApartmentId      = booking.ApartmentId,
+        ApartmentName    = booking.Apartment?.Name ?? "",
+        ApartmentType    = booking.Apartment?.Type ?? "",
+        Room             = booking.Room,
+        RoomType         = booking.RoomType.ToString(),
+        BoardType        = booking.BoardType,
+        Occupancy        = booking.Occupancy,
+        CheckIn          = booking.CheckIn,
+        CheckOut         = booking.CheckOut,
+        Adults           = booking.Adults,
+        Children         = booking.Children,
+        ChildrenAges     = booking.ChildrenAges,
+        TotalPrice       = booking.TotalPrice,
+        Status           = booking.Status.ToString(),
+        SpecialRequests  = booking.SpecialRequests,
+        CreatedAt        = booking.CreatedAt,
+        UpdatedAt        = booking.UpdatedAt
+    };
+}
 
         private string GenerateBookingReference() =>
             Guid.NewGuid().ToString("N")[..8].ToUpper();

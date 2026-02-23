@@ -181,6 +181,57 @@ namespace GolfViewApartments.API.Controllers
         }
 
         /// <summary>
+        /// Update a booking (admin edit)
+        /// </summary>
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<ApiResponse<BookingResponseDto>>> UpdateBooking(
+            int id, [FromBody] BookingDto request)
+        {
+            try
+            {
+                var booking = await _bookingService.UpdateBookingAsync(id, request);
+                return Ok(ApiResponse<BookingResponseDto>.SuccessResponse(booking, "Booking updated successfully"));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse<BookingResponseDto>.FailureResponse("Booking not found", ex.Message));
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ApiResponse<BookingResponseDto>.FailureResponse("Invalid request", ex.Message));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating booking {Id}", id);
+                return StatusCode(500, ApiResponse<BookingResponseDto>.FailureResponse(
+                    "An error occurred while updating the booking"));
+            }
+        }
+
+        /// <summary>
+        /// Delete a booking
+        /// </summary>
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult<ApiResponse>> DeleteBooking(int id)
+        {
+            try
+            {
+                await _bookingService.DeleteBookingAsync(id);
+                return Ok(ApiResponse.SuccessResponse("Booking deleted successfully"));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ApiResponse.FailureResponse("Booking not found", ex.Message));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting booking {Id}", id);
+                return StatusCode(500, ApiResponse.FailureResponse(
+                    "An error occurred while deleting the booking"));
+            }
+        }
+
+        /// <summary>
         /// Update booking status
         /// </summary>
         [HttpPut("{id:int}/status")]
@@ -224,7 +275,6 @@ namespace GolfViewApartments.API.Controllers
 
         /// <summary>
         /// Get available rooms by apartment type AND dates.
-        /// Used by Booking.razor so the guest can pick their specific room.
         /// GET api/bookings/rooms/available?type=Studio&checkIn=2025-06-01&checkOut=2025-06-05
         /// </summary>
         [HttpGet("rooms/available")]
