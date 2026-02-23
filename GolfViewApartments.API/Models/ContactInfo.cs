@@ -36,6 +36,9 @@ namespace GolfViewApartments.API.Models
 
         [StringLength(200)]
         public string TwitterUrl { get; set; } = string.Empty;
+        public string MondayFridayHours { get; set; } = "";
+    public string SaturdayHours { get; set; } = "";
+    public string SundayHours { get; set; } = "";
 
         public DateTime UpdatedAt { get; set; }
     }

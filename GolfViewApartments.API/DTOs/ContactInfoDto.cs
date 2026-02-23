@@ -11,5 +11,8 @@ namespace GolfViewApartments.API.DTOs
         public string FacebookUrl { get; set; } = string.Empty;
         public string InstagramUrl { get; set; } = string.Empty;
         public string TwitterUrl { get; set; } = string.Empty;
+        public string MondayFridayHours { get; set; } = "";
+public string SaturdayHours { get; set; } = "";
+public string SundayHours { get; set; } = "";
     }
 }

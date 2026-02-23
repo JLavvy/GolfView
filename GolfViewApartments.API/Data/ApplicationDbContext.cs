@@ -297,6 +297,9 @@ namespace GolfViewApartments.API.Data
                     FacebookUrl = "",
                     InstagramUrl = "",
                     TwitterUrl = "",
+                    MondayFridayHours = "8:00 AM - 6:00 PM",
+                    SaturdayHours = "9:00 AM - 5:00 PM",
+                    SundayHours = "By Appointment Only",
                     UpdatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
@@ -413,14 +416,6 @@ namespace GolfViewApartments.API.Data
                     Name = "Half Day Package",
                     IconClass = "fa-solid fa-cloud-sun",
                     Price = 1500m,
-                    CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                },
-                new ConferencePackage
-                {
-                    Id = 3,
-                    Name = "Residential Package",
-                    IconClass = "fa-solid fa-bed-pulse",
-                    Price = 8000m,
                     CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 }
             );
