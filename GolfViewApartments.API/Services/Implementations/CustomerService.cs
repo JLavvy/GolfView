@@ -18,21 +18,22 @@ namespace GolfViewApartments.API.Services.Implementations
             _logger = logger;
         }
 
+        // ================================
+        // CREATE
+        // ================================
         public async Task<CustomerResponseDto> CreateCustomerAsync(CustomerRequestDto request)
         {
-            // Check if customer with this email already exists
             var existingCustomer = await _customerRepository.GetByEmailAsync(request.Email);
-            
+
             if (existingCustomer != null)
             {
                 _logger.LogInformation(
-                    "Customer with email {Email} already exists, returning existing customer",
+                    "Customer with email {Email} already exists. Returning existing customer.",
                     request.Email);
-                
+
                 return MapToResponseDto(existingCustomer);
             }
 
-            // Create new customer
             var customer = new Customer
             {
                 FirstName = request.FirstName,
@@ -45,12 +46,16 @@ namespace GolfViewApartments.API.Services.Implementations
             await _customerRepository.AddAsync(customer);
 
             _logger.LogInformation(
-                "Customer created: ID={CustomerId}, Email={Email}",
-                customer.Id, customer.Email);
+                "Customer created successfully. ID={CustomerId}, Email={Email}",
+                customer.Id,
+                customer.Email);
 
             return MapToResponseDto(customer);
         }
 
+        // ================================
+        // GET BY ID
+        // ================================
         public async Task<CustomerResponseDto> GetCustomerByIdAsync(int id)
         {
             var customer = await _customerRepository.GetByIdAsync(id)
@@ -59,13 +64,21 @@ namespace GolfViewApartments.API.Services.Implementations
             return MapToResponseDto(customer);
         }
 
+        // ================================
+        // GET BY EMAIL
+        // ================================
         public async Task<CustomerResponseDto?> GetCustomerByEmailAsync(string email)
         {
             var customer = await _customerRepository.GetByEmailAsync(email);
-            
-            return customer != null ? MapToResponseDto(customer) : null;
+
+            return customer != null
+                ? MapToResponseDto(customer)
+                : null;
         }
 
+        // ================================
+        // GET ALL
+        // ================================
         public async Task<List<CustomerResponseDto>> GetAllCustomersAsync()
         {
             var customers = await _customerRepository.GetAllAsync();
@@ -75,6 +88,58 @@ namespace GolfViewApartments.API.Services.Implementations
                 .ToList();
         }
 
+        // ================================
+        // UPDATE
+        // ================================
+        public async Task<CustomerResponseDto> UpdateCustomerAsync(int id, CustomerRequestDto request)
+        {
+            var customer = await _customerRepository.GetByIdAsync(id)
+                ?? throw new KeyNotFoundException($"Customer with ID {id} not found");
+
+            // Check if email is being changed and already exists
+            if (!string.Equals(customer.Email, request.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                var existingCustomer = await _customerRepository.GetByEmailAsync(request.Email);
+
+                if (existingCustomer != null && existingCustomer.Id != id)
+                {
+                    throw new InvalidOperationException(
+                        $"Another customer with email {request.Email} already exists");
+                }
+            }
+
+            customer.FirstName = request.FirstName;
+            customer.LastName = request.LastName;
+            customer.Email = request.Email;
+            customer.Phone = request.Phone;
+
+            await _customerRepository.UpdateAsync(customer);
+
+            _logger.LogInformation(
+                "Customer updated successfully. ID={CustomerId}",
+                customer.Id);
+
+            return MapToResponseDto(customer);
+        }
+
+        // ================================
+        // DELETE
+        // ================================
+        public async Task DeleteCustomerAsync(int id)
+        {
+            var customer = await _customerRepository.GetByIdAsync(id)
+                ?? throw new KeyNotFoundException($"Customer with ID {id} not found");
+
+            await _customerRepository.DeleteAsync(customer);
+
+            _logger.LogInformation(
+                "Customer deleted successfully. ID={CustomerId}",
+                id);
+        }
+
+        // ================================
+        // MAPPING
+        // ================================
         private static CustomerResponseDto MapToResponseDto(Customer customer)
         {
             return new CustomerResponseDto

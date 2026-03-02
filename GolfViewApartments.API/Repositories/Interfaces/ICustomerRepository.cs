@@ -8,7 +8,7 @@ namespace GolfViewApartments.API.Repositories.Interfaces
         Task<Customer?> GetByEmailAsync(string email);
         Task<List<Customer>> GetAllAsync();
         Task AddAsync(Customer customer);
-        void Update(Customer customer);
-        void Delete(Customer customer);
+        Task UpdateAsync(Customer customer);   // was Update()
+        Task DeleteAsync(Customer customer);
     }
 }

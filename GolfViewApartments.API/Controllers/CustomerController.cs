@@ -99,5 +99,50 @@ namespace GolfViewApartments.API.Controllers
                 return StatusCode(500, new { message = "An error occurred while retrieving customers" });
             }
         }
+        /// <summary>
+/// Update customer
+/// </summary>
+[HttpPut("{id}")]
+public async Task<ActionResult<CustomerResponseDto>> UpdateCustomer(
+    int id,
+    [FromBody] CustomerRequestDto request)
+{
+    try
+    {
+        var updatedCustomer = await _customerService.UpdateCustomerAsync(id, request);
+        return Ok(updatedCustomer);
+    }
+    catch (KeyNotFoundException ex)
+    {
+        return NotFound(new { message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error updating customer {CustomerId}", id);
+        return StatusCode(500, new { message = "An error occurred while updating the customer" });
+    }
+}
+
+/// <summary>
+/// Delete customer
+/// </summary>
+[HttpDelete("{id}")]
+public async Task<ActionResult> DeleteCustomer(int id)
+{
+    try
+    {
+        await _customerService.DeleteCustomerAsync(id);
+        return NoContent();
+    }
+    catch (KeyNotFoundException ex)
+    {
+        return NotFound(new { message = ex.Message });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error deleting customer {CustomerId}", id);
+        return StatusCode(500, new { message = "An error occurred while deleting the customer" });
+    }
+}
     }
 }
